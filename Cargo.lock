@@ -606,6 +606,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "eden-http-api"
+version = "0.2.0-alpha.0"
+dependencies = [
+ "eden-database",
+ "eden-kernel",
+ "serde",
+ "twilight-model",
+ "uuid",
+]
+
+[[package]]
+name = "eden-kernel"
+version = "0.2.0-alpha.0"
+dependencies = [
+ "bon",
+ "eden-common",
+ "eden-config",
+ "eden-sqlite",
+ "error-stack",
+]
+
+[[package]]
 name = "eden-sqlite"
 version = "0.2.0-alpha.0"
 dependencies = [

@@ -1,5 +1,6 @@
 use bon::Builder;
 use error_stack::{Report, ResultExt};
+use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Type};
 use thiserror::Error;
 use twilight_model::id::{Id, marker::UserMarker};
@@ -9,7 +10,7 @@ use crate::{Snowflake, Timestamp};
 
 /// A Minecraft account linked to a primary guild member.
 #[derive(Debug, Clone, FromRow)]
-pub struct MinecraftAccount {
+pub struct DbMinecraftAccount {
     pub id: i32,
     pub linked_at: Timestamp,
     pub discord_user_id: Snowflake,
@@ -19,12 +20,12 @@ pub struct MinecraftAccount {
     pub kind: McAccountType,
 }
 
-impl MinecraftAccount {
+impl DbMinecraftAccount {
     pub async fn find_by_uuid(
         conn: &mut eden_sqlite::Connection,
         uuid: Uuid,
     ) -> Result<Option<Self>, Report<MinecraftAccountQueryError>> {
-        sqlx::query_as::<_, MinecraftAccount>(
+        sqlx::query_as::<_, DbMinecraftAccount>(
             r#"
             SELECT * FROM minecraft_accounts
             WHERE uuid = ?"#,
@@ -37,7 +38,7 @@ impl MinecraftAccount {
     }
 }
 
-impl MinecraftAccount {
+impl DbMinecraftAccount {
     #[allow(clippy::new_ret_no_self)]
     pub fn new<'a>() -> NewMinecraftAccountBuilder<'a> {
         NewMinecraftAccount::builder()
@@ -61,8 +62,8 @@ impl<'a> NewMinecraftAccount<'a> {
     pub async fn create(
         &self,
         conn: &mut eden_sqlite::Transaction<'_>,
-    ) -> Result<MinecraftAccount, Report<MinecraftAccountQueryError>> {
-        sqlx::query_as::<_, MinecraftAccount>(
+    ) -> Result<DbMinecraftAccount, Report<MinecraftAccountQueryError>> {
+        sqlx::query_as::<_, DbMinecraftAccount>(
             r#"
             INSERT INTO minecraft_accounts (
                 discord_user_id, uuid, username, "type"
@@ -82,14 +83,15 @@ impl<'a> NewMinecraftAccount<'a> {
 }
 
 /// Differentiates between Minecraft editions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Type, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
 #[sqlx(type_name = "mc_account_type", rename_all = "lowercase")]
 pub enum McAccountType {
     Java,
     Bedrock,
 }
 
-impl MinecraftAccount {
+impl DbMinecraftAccount {
     /// Returns `true` if this account is a Java edition account.
     #[must_use]
     pub const fn is_java(&self) -> bool {
@@ -111,16 +113,16 @@ mod tests {
     use twilight_model::id::marker::UserMarker;
     use uuid::Uuid;
 
-    use crate::primary_guild::member::Member;
-    use crate::primary_guild::minecraft_account::{McAccountType, MinecraftAccount};
+    use crate::primary_guild::member::DbMember;
+    use crate::primary_guild::minecraft::{DbMinecraftAccount, McAccountType};
 
     #[must_use]
     async fn setup_member(
         conn: &mut eden_sqlite::Transaction<'_>,
         id: Id<UserMarker>,
         name: &str,
-    ) -> Member {
-        Member::upsert()
+    ) -> DbMember {
+        DbMember::upsert()
             .discord_user_id(id)
             .name(name)
             .build()
@@ -142,7 +144,7 @@ mod tests {
         let mut conn = pool.begin().await.unwrap();
         _ = setup_member(&mut conn, id, "john").await;
 
-        MinecraftAccount::new()
+        DbMinecraftAccount::new()
             .account_type(McAccountType::Java)
             .discord_user_id(id)
             .username("john")
@@ -153,7 +155,7 @@ mod tests {
             .unwrap();
 
         // Case #1: duplicated UUID and user's ID with different name
-        let result = MinecraftAccount::new()
+        let result = DbMinecraftAccount::new()
             .account_type(McAccountType::Java)
             .discord_user_id(id)
             .username("john2")
@@ -169,7 +171,7 @@ mod tests {
 
         // Case #2: duplicated UUID and user's ID with different account type
         //          (Bedrock XUID is different when it comes to generating it compared to Java UUID)
-        let result = MinecraftAccount::new()
+        let result = DbMinecraftAccount::new()
             .account_type(McAccountType::Bedrock)
             .discord_user_id(id)
             .username("john")
@@ -197,7 +199,7 @@ mod tests {
         let mut conn = pool.begin().await.unwrap();
         _ = setup_member(&mut conn, id, "john").await;
 
-        let account = MinecraftAccount::new()
+        let account = DbMinecraftAccount::new()
             .account_type(McAccountType::Java)
             .discord_user_id(id)
             .username("john")
