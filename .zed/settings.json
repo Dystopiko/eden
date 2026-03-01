@@ -6,16 +6,16 @@
         "diagnostics": {
           // rust-analyzer emits diagnostics if one of the ignored
           // proc-macros used is disabled
-          "disabled": ["proc-macro-disabled"],
+          "disabled": ["proc-macro-disabled"]
         },
 
         // Disable diagnostics in async-trait macro
         "procMacro": {
           "ignored": {
-            "async-trait": ["async_trait"],
-          },
-        },
-      },
-    },
-  },
+            "async-trait": ["async_trait"]
+          }
+        }
+      }
+    }
+  }
 }
