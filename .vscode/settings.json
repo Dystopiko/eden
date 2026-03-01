@@ -1,0 +1,6 @@
+{
+  "rust-analyzer.diagnostics.disabled": ["proc-macro-disabled"],
+  "rust-analyzer.procMacro.ignored": {
+    "async-trait": ["async_trait"]
+  }
+}
