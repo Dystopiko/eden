@@ -62,4 +62,5 @@ features = [
     "tls-rustls-aws-lc-rs"
 ]
 
-[workspace.lints]
+[workspace.lints.clippy]
+derivable_impls = "allow"

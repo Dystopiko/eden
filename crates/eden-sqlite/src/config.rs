@@ -61,7 +61,6 @@ pub enum PoolConfigBuildError {
 
 impl<S: pool_config_builder::IsComplete> PoolConfigBuilder<S> {
     /// Validates and returns the completed [`PoolConfig`].
-    #[must_use]
     pub fn build(self) -> Result<PoolConfig, Report<PoolConfigBuildError>> {
         let config = self.build_internal();
         if config.max_connections == 0 {

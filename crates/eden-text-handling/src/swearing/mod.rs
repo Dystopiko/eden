@@ -30,7 +30,7 @@ pub fn censor<'s>(
 
             let out = output.get_or_insert_with(|| String::with_capacity(text.len()));
             out.push_str(&text[last..word_start]);
-            out.extend(std::iter::repeat('*').take(word.len()));
+            out.extend(std::iter::repeat_n('*', word.len()));
             last = word_end;
         }
     }
@@ -55,7 +55,6 @@ pub fn censor<'s>(
 ///
 /// The returned iterator is lazy — no processing occurs until it is consumed.
 /// If you need to collect all bad words at once, use [`.collect::<Vec<_>>()`].
-#[must_use]
 pub fn find_bad_words<'s>(
     content: &'s str,
     modifier: impl for<'a> Fn(&'a mut Censor<Chars<'s>>) -> &'a mut Censor<Chars<'s>>,

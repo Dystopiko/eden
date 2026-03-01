@@ -28,7 +28,6 @@ impl Pool {
     ///
     /// The pool is created lazily so no connections are opened until
     /// the first operation is performed.
-    #[must_use]
     pub fn new(config: PoolConfig) -> Result<Self, Report<PoolBuildError>> {
         let url = SqliteConnectOptions::from_str(&config.url)
             .change_context(PoolBuildError::InvalidConnectionURL)?

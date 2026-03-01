@@ -38,9 +38,9 @@ impl<'a, T> From<&'a mut Id<T>> for Snowflake {
     }
 }
 
-impl<T> Into<Id<T>> for Snowflake {
-    fn into(self) -> Id<T> {
-        self.0.cast()
+impl<T> From<Snowflake> for Id<T> {
+    fn from(val: Snowflake) -> Self {
+        val.0.cast()
     }
 }
 

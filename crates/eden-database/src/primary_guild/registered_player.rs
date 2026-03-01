@@ -56,7 +56,6 @@ pub struct UpsertPlayer<'a> {
 type FromUserState = upsert_player_builder::SetName<upsert_player_builder::SetDiscordUserId>;
 
 impl<'a> UpsertPlayer<'a> {
-    #[must_use]
     pub fn builder_from_user(user: &'a User) -> UpsertPlayerBuilder<'a, FromUserState> {
         Self::builder()
             .discord_user_id(user.id.into())

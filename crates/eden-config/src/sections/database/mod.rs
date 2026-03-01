@@ -229,9 +229,9 @@ impl<'de> serde::de::Visitor<'de> for Visitor {
         }
 
         if !trimmed.starts_with("sqlite:") && !trimmed.starts_with('/') {
-            return Err(E::custom(format!(
-                "invalid SQLite URL: must start with `sqlite:` or be an absolute path"
-            )));
+            return Err(E::custom(
+                "invalid SQLite URL: must start with `sqlite:` or be an absolute path",
+            ));
         }
 
         Ok(SqliteUrl::Url(Sensitive::new(trimmed.to_string())))

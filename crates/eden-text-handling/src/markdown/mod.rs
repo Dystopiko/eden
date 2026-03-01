@@ -33,14 +33,11 @@ pub fn strip_markdown(text: &str) -> String {
                 }
                 _ => {}
             };
-        } else if let NodeEdge::End(node) = edge {
-            match &node.data().value {
-                NodeValue::Item(..) => {
-                    output.push('\n');
-                }
-                _ => {}
-            };
-        }
+        } else if let NodeEdge::End(node) = edge
+            && let NodeValue::Item(..) = &node.data().value
+        {
+            output.push('\n');
+        };
     }
 
     output
