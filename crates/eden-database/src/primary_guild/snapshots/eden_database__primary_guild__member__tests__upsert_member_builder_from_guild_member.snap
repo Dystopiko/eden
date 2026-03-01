@@ -1,0 +1,11 @@
+---
+source: crates/eden-database/src/primary_guild/member.rs
+expression: query
+---
+UpsertMember {
+    discord_user_id: Id<UserMarker>(12234),
+    joined_at: Timestamp(
+        2022-01-01T00:00:00Z,
+    ),
+    name: "foo",
+}

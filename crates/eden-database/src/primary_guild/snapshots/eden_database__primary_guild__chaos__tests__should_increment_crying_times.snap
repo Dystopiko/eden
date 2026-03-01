@@ -1,8 +1,0 @@
----
-source: crates/eden-database/src/primary_guild/chaos.rs
-expression: info
----
-Chaos {
-    id: 1,
-    crying_times: 1,
-}

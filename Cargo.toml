@@ -59,7 +59,8 @@ features = [
     "migrate",
     "runtime-tokio",
     "sqlite",
-    "tls-rustls-aws-lc-rs"
+    "tls-rustls-aws-lc-rs",
+    "uuid"
 ]
 
 [workspace.lints.clippy]

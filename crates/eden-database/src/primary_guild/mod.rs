@@ -1,7 +1,7 @@
 pub mod chaos;
-pub mod linked_mc_account;
-pub mod registered_player;
+pub mod member;
+pub mod minecraft_account;
 
 pub use self::chaos::Chaos;
-pub use self::linked_mc_account::{LinkedMcAccount, McAccountType};
-pub use self::registered_player::RegisteredPlayer;
+pub use self::member::Member;
+pub use self::minecraft_account::{McAccountType, MinecraftAccount};
