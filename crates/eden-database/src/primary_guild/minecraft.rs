@@ -24,16 +24,16 @@ impl McAccount {
     pub async fn find_by_uuid(
         conn: &mut eden_sqlite::Connection,
         uuid: Uuid,
-    ) -> Result<Option<Self>, Report<MinecraftAccountQueryError>> {
+    ) -> Result<Self, Report<McAccountQueryError>> {
         sqlx::query_as::<_, McAccount>(
             r#"
             SELECT * FROM minecraft_accounts
             WHERE uuid = ?"#,
         )
         .bind(uuid)
-        .fetch_optional(conn)
+        .fetch_one(conn)
         .await
-        .change_context(MinecraftAccountQueryError)
+        .change_context(McAccountQueryError)
         .attach("while trying to find minecraft account by uuid")
     }
 }
@@ -48,7 +48,7 @@ impl McAccount {
 /// Error type representing a failure to query with the [`MinecraftAccount`] table.
 #[derive(Debug, Error)]
 #[error("Failed to query minecraft account table from the database")]
-pub struct MinecraftAccountQueryError;
+pub struct McAccountQueryError;
 
 #[derive(Builder)]
 pub struct NewMcAccount<'a> {
@@ -62,7 +62,7 @@ impl<'a> NewMcAccount<'a> {
     pub async fn create(
         &self,
         conn: &mut eden_sqlite::Transaction<'_>,
-    ) -> Result<McAccount, Report<MinecraftAccountQueryError>> {
+    ) -> Result<McAccount, Report<McAccountQueryError>> {
         sqlx::query_as::<_, McAccount>(
             r#"
             INSERT INTO minecraft_accounts (
@@ -77,7 +77,7 @@ impl<'a> NewMcAccount<'a> {
         .bind(self.account_type)
         .fetch_one(&mut **conn)
         .await
-        .change_context(MinecraftAccountQueryError)
+        .change_context(McAccountQueryError)
         .attach("while trying to create minecraft account")
     }
 }

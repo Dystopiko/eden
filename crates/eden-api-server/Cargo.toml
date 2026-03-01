@@ -1,0 +1,25 @@
+[package]
+name = "eden-api-server"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-api-types = { path = "../eden-api-types" }
+eden-common = { path = "../eden-common" }
+eden-database = { path = "../eden-database" }
+eden-kernel = { path = "../eden-kernel" }
+eden-sqlite = { path = "../eden-sqlite" }
+
+error-stack = { workspace = true }
+tracing = { workspace = true }
+
+[dependencies.axum]
+version = "0.8.8"
+default-features = false
+features = ["http1", "json", "query", "tokio", "tower-log", "tracing"]
+
+[lints]
+workspace = true

@@ -21,14 +21,14 @@ impl Member {
     pub async fn find_by_discord_user_id(
         conn: &mut eden_sqlite::Connection,
         id: Snowflake,
-    ) -> Result<Option<Self>, Report<MemberQueryError>> {
+    ) -> Result<Self, Report<MemberQueryError>> {
         sqlx::query_as::<_, Member>(
             r#"
             SELECT * FROM members
             WHERE discord_user_id = ?"#,
         )
         .bind(id)
-        .fetch_optional(conn)
+        .fetch_one(conn)
         .await
         .change_context(MemberQueryError)
         .attach("while trying to find player by user id")

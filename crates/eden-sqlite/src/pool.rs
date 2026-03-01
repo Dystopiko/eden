@@ -5,7 +5,7 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use crate::config::PoolConfig;
-use crate::error::{PoolBuildError, PoolError, SqlErrorType, SqlxErrorExt};
+use crate::error::{PoolBuildError, PoolError, SqlErrorType};
 
 pub use sqlx::SqliteConnection as Connection;
 
@@ -111,7 +111,12 @@ impl Pool {
     async fn probe(&self) -> Result<bool, Report<PoolError>> {
         let mut conn = match self.inner.acquire().await {
             Ok(conn) => conn,
-            Err(error) if matches!(error.sql_error_type(), SqlErrorType::UnhealthyConnection) => {
+            Err(error)
+                if matches!(
+                    SqlErrorType::from_sqlx_error(&error),
+                    SqlErrorType::UnhealthyConnection
+                ) =>
+            {
                 return Ok(false);
             }
             Err(error) => return Err(error).change_context(PoolError::General),
@@ -119,7 +124,12 @@ impl Pool {
 
         match sqlx::query("SELECT 1").execute(&mut *conn).await {
             Ok(..) => Ok(true),
-            Err(error) if matches!(error.sql_error_type(), SqlErrorType::UnhealthyConnection) => {
+            Err(error)
+                if matches!(
+                    SqlErrorType::from_sqlx_error(&error),
+                    SqlErrorType::UnhealthyConnection
+                ) =>
+            {
                 Ok(false)
             }
             Err(error) => Err(error).change_context(PoolError::General),
@@ -155,7 +165,7 @@ impl From<sqlx::SqlitePool> for Pool {
 }
 
 fn classify_pool_err(error: sqlx::Error) -> Report<PoolError> {
-    let context = match error.sql_error_type() {
+    let context = match SqlErrorType::from_sqlx_error(&error) {
         SqlErrorType::UnhealthyConnection => PoolError::Unhealthy,
         _ => PoolError::General,
     };

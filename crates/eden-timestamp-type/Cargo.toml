@@ -1,0 +1,19 @@
+[package]
+name = "eden-timestamp-type"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+chrono = { workspace = true }
+serde = { workspace = true }
+sqlx = { workspace = true, optional = true }
+
+[dev-dependencies]
+eden-common = { path = "../eden-common" }
+eden-sqlite = { path = "../eden-sqlite" }
+
+[lints]
+workspace = true

@@ -1,0 +1,8 @@
+---
+source: crates/eden-api-types/tests/serialization/common.rs
+expression: json
+---
+{
+  "error": "internal",
+  "message": "Please try again later."
+}

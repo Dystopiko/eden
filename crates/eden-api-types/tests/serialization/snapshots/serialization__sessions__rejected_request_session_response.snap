@@ -1,0 +1,9 @@
+---
+source: crates/eden-api-types/tests/serialization/sessions.rs
+expression: json
+---
+{
+  "status": "rejected",
+  "reason": "This server is currently in locked down mode",
+  "note": "Please come to us again later once it is free for everyone"
+}

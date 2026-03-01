@@ -57,13 +57,13 @@ Content-Type: application/json
 }
 ```
 
-**Case 2: Restricted (timed out, closed, suspended, etc.)**
+**Case 2: Rejected (timed out, closed, suspended, etc.)**
 ```http
 HTTP/1.1 403 Forbidden
 Content-Type: application/json
 
 {
-    "status": "restricted",
+    "status": "rejected",
     "reason": "This server is only for registered players temporarily.",
     "note": "Please come to us again later."
 }

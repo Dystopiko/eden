@@ -1,0 +1,9 @@
+---
+source: crates/eden-api-types/tests/serialization/common.rs
+expression: json
+---
+{
+  "id": "273534239310479360",
+  "name": "ferris",
+  "joined_at": "2024-01-01T00:00:00+00:00"
+}

@@ -37,12 +37,41 @@ const SQLITE_CANTOPEN: &str = "14";
 pub enum SqlErrorType {
     Unknown,
     UnhealthyConnection,
+    RowNotFound,
     UniqueViolation(String),
 }
 
-/// Extension trait that classifies a [`sqlx::Error`] into a [`SqlErrorType`].
-pub trait SqlxErrorExt {
-    fn sql_error_type(&self) -> SqlErrorType;
+impl SqlErrorType {
+    #[must_use]
+    pub(crate) fn from_sqlx_error(error: &sqlx::Error) -> Self {
+        match error {
+            sqlx::Error::PoolTimedOut | sqlx::Error::PoolClosed | sqlx::Error::WorkerCrashed => {
+                SqlErrorType::UnhealthyConnection
+            }
+            sqlx::Error::RowNotFound => SqlErrorType::RowNotFound,
+            sqlx::Error::Database(inner) => {
+                Self::into_sqlite_error_type(inner.downcast_ref::<SqliteError>())
+            }
+            _ => SqlErrorType::Unknown,
+        }
+    }
+
+    fn into_sqlite_error_type(err: &SqliteError) -> SqlErrorType {
+        match err.code().as_deref() {
+            // https://sqlite.org/rescode.html#constraint_unique
+            Some(SQLITE_CONSTRAINT_UNIQUE) => {
+                SqlErrorType::UniqueViolation(err.message().to_string())
+            }
+            // https://sqlite.org/rescode.html#cantopen
+            Some(SQLITE_CANTOPEN) => SqlErrorType::UnhealthyConnection,
+            _ => SqlErrorType::Unknown,
+        }
+    }
+}
+
+/// Extension trait that classifies a [`Report`] into a [`SqlErrorType`].
+pub trait ReportExt {
+    fn sql_error_type(&self) -> Option<&SqlErrorType>;
 }
 
 /// Extension trait that classifies an [`SqlErrorType`] from a [`Result`] type.
@@ -50,35 +79,56 @@ pub trait ResultExt {
     fn sql_error_type(&self) -> Option<&SqlErrorType>;
 }
 
-fn into_sqlite_error_type(err: &SqliteError) -> SqlErrorType {
-    match err.code().as_deref() {
-        // https://sqlite.org/rescode.html#constraint_unique
-        Some(SQLITE_CONSTRAINT_UNIQUE) => SqlErrorType::UniqueViolation(err.message().to_string()),
-        // https://sqlite.org/rescode.html#cantopen
-        Some(SQLITE_CANTOPEN) => SqlErrorType::UnhealthyConnection,
-        _ => SqlErrorType::Unknown,
+impl<E> ReportExt for Report<E> {
+    fn sql_error_type(&self) -> Option<&SqlErrorType> {
+        self.downcast_ref::<SqlErrorType>()
     }
 }
 
-impl SqlxErrorExt for sqlx::Error {
-    fn sql_error_type(&self) -> SqlErrorType {
-        match self {
-            sqlx::Error::PoolTimedOut | sqlx::Error::PoolClosed | sqlx::Error::WorkerCrashed => {
-                SqlErrorType::UnhealthyConnection
-            }
-            sqlx::Error::Database(inner) => {
-                into_sqlite_error_type(inner.downcast_ref::<SqliteError>())
-            }
-            _ => SqlErrorType::Unknown,
-        }
-    }
-}
-
-impl<T> ResultExt for Result<T, Report<PoolError>> {
+impl<T, E> ResultExt for Result<T, Report<E>> {
     fn sql_error_type(&self) -> Option<&SqlErrorType> {
         let Err(error) = self else {
             return None;
         };
-        error.downcast_ref::<SqlErrorType>()
+        error.sql_error_type()
+    }
+}
+
+/// Extension trait that converts a [`Result`] from a database query into an
+/// "optional" result, treating a [`SqlErrorType::RowNotFound`] error as a
+/// successful absence of data rather than a failure.
+///
+/// This is useful when querying for a single row by primary key or unique
+/// constraint, where "not found" is an expected and non-exceptional outcome.
+pub trait QueryResultExt: Sized {
+    /// The success type of the underlying `Result`.
+    type Okay;
+
+    /// The error context type wrapped inside the [`error_stack::Report`].
+    type Err;
+
+    /// Converts a `Result<Self::Okay, Report<Self::Err>>` into a
+    /// `Result<Option<Self::Okay>, Report<Self::Err>>`.
+    ///
+    /// - If the result is `Ok(value)`, returns `Ok(Some(value))`.
+    /// - If the result is an `Err` whose attached [`SqlErrorType`] is
+    ///   [`SqlErrorType::RowNotFound`], returns `Ok(None)`.
+    /// - Any other error is returned as-is.
+    fn optional(self) -> Result<Option<Self::Okay>, Report<Self::Err>>;
+}
+
+impl<T, E> QueryResultExt for Result<T, Report<E>> {
+    type Okay = T;
+    type Err = E;
+
+    fn optional(self) -> Result<Option<T>, Report<E>> {
+        match self {
+            // Query succeeded — wrap the value in Some.
+            Ok(okay) => Ok(Some(okay)),
+            // Query failed with RowNotFound — treat as a successful empty result.
+            Err(..) if matches!(self.sql_error_type(), Some(SqlErrorType::RowNotFound)) => Ok(None),
+            // Any other error — propagate as-is.
+            Err(error) => Err(error),
+        }
     }
 }

@@ -8,7 +8,7 @@ use eden_sqlite::{PooledConnection, Transaction};
 use error_stack::Report;
 
 pub use self::snowflake::Snowflake;
-pub use self::timestamp::Timestamp;
+pub use eden_timestamp_type::Timestamp;
 
 /// A trait for managing database connection pools with primary/replica support.
 ///

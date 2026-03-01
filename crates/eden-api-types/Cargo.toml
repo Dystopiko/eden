@@ -1,0 +1,29 @@
+[package]
+name = "eden-api-types"
+description = "Types for Eden API v1"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["server"]
+server = ["dep:eden-database"]
+
+[dependencies]
+eden-timestamp-type = { path = "../eden-timestamp-type" }
+serde = { workspace = true }
+twilight-model = { workspace = true }
+uuid = { workspace = true }
+
+eden-database = { path = "../eden-database", optional = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+serde_json = { workspace = true }
+
+serde_test = "1.0.177"
+
+[lints]
+workspace = true
