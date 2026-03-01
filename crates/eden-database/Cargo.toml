@@ -20,8 +20,6 @@ tokio = { workspace = true }
 twilight-model = { workspace = true }
 uuid = { workspace = true }
 
-async-trait = "0.1.89"
-
 [dev-dependencies]
 eden-common = { path = "../eden-common" }
 

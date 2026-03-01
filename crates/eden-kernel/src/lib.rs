@@ -1,6 +1,7 @@
 use bon::Builder;
 use eden_common::signals::ShutdownSignal;
 use eden_config::Config;
+use eden_database::DatabasePools;
 use eden_sqlite::{Pool, error::PoolBuildError};
 use error_stack::{Report, ResultExt};
 use std::sync::Arc;
@@ -58,6 +59,16 @@ impl<S: kernel_builder::State> KernelBuilder<S> {
         S: kernel_builder::IsComplete,
     {
         Arc::new(self.build_inner())
+    }
+}
+
+impl DatabasePools for Kernel {
+    fn primary_db(&self) -> &eden_sqlite::Pool {
+        &self.primary_db
+    }
+
+    fn replica_db(&self) -> Option<&eden_sqlite::Pool> {
+        self.replica_db.as_ref()
     }
 }
 

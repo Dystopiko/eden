@@ -3,7 +3,6 @@ pub mod primary_guild;
 pub mod snowflake;
 pub mod timestamp;
 
-use async_trait::async_trait;
 use eden_sqlite::error::PoolError;
 use eden_sqlite::{PooledConnection, Transaction};
 use error_stack::Report;
@@ -16,7 +15,7 @@ pub use self::timestamp::Timestamp;
 /// This trait provides an abstraction over SQLite connection pools, supporting
 /// both a required primary database and an optional replica database. It handles
 /// connection acquisition with automatic fallback logic to maximize availability.
-#[async_trait]
+#[allow(async_fn_in_trait)]
 pub trait DatabasePools: Send + Sync {
     /// Returns a reference to the primary database connection pool.
     ///
@@ -109,7 +108,16 @@ pub trait DatabasePools: Send + Sync {
     }
 }
 
-#[async_trait]
+impl<T: DatabasePools> DatabasePools for std::sync::Arc<T> {
+    fn primary_db(&self) -> &eden_sqlite::Pool {
+        std::sync::Arc::as_ref(self).primary_db()
+    }
+
+    fn replica_db(&self) -> Option<&eden_sqlite::Pool> {
+        std::sync::Arc::as_ref(self).replica_db()
+    }
+}
+
 impl DatabasePools for eden_sqlite::Pool {
     fn primary_db(&self) -> &eden_sqlite::Pool {
         self
