@@ -7,7 +7,9 @@ Config {
         application_id: Id<ApplicationMarker>(1),
         primary_guild: PrimaryGuild {
             id: Id<GuildMarker>(1),
-            pompom: None,
+            chaos: ChaosNeco {
+                user_ids: [],
+            },
         },
         token: Token(..),
     },

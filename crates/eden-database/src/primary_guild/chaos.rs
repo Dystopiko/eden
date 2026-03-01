@@ -22,9 +22,8 @@ pub struct Chaos {
 pub struct UpdateChaosError;
 
 impl Chaos {
-    #[tracing::instrument(skip_all, name = "db.chaos.increment_crying_times")]
     pub async fn increment_crying_times(
-        conn: &mut eden_sqlite::Connection,
+        conn: &mut eden_sqlite::Transaction<'_>,
     ) -> Result<Self, Report<UpdateChaosError>> {
         sqlx::query_as::<_, Chaos>(
             r#"
@@ -37,7 +36,7 @@ impl Chaos {
         "#,
         )
         .bind(Timestamp::now())
-        .fetch_one(conn)
+        .fetch_one(&mut **conn)
         .await
         .change_context(UpdateChaosError)
     }
@@ -45,9 +44,8 @@ impl Chaos {
 
 #[cfg(test)]
 mod tests {
-    use eden_sqlite::Pool;
-
     use crate::primary_guild::Chaos;
+    use eden_sqlite::Pool;
 
     #[tokio::test]
     async fn should_increment_first_crying_times() {
@@ -56,7 +54,7 @@ mod tests {
         let pool = Pool::memory(None).await;
         crate::migrations::perform(&pool).await.unwrap();
 
-        let mut conn = pool.acquire().await.unwrap();
+        let mut conn = pool.begin().await.unwrap();
         let info = Chaos::increment_crying_times(&mut conn).await.unwrap();
 
         assert_eq!(info.id, 1);
@@ -70,7 +68,7 @@ mod tests {
         let pool = Pool::memory(None).await;
         crate::migrations::perform(&pool).await.unwrap();
 
-        let mut conn = pool.acquire().await.unwrap();
+        let mut conn = pool.begin().await.unwrap();
         Chaos::increment_crying_times(&mut conn).await.unwrap();
 
         let info = Chaos::increment_crying_times(&mut conn).await.unwrap();
