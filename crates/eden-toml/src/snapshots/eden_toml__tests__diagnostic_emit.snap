@@ -1,0 +1,9 @@
+---
+source: crates/eden-toml/src/lib.rs
+expression: diagnostic
+---
+error: key with no value, expected `=`
+  ┌─ <test-emit>:1:6
+  │
+1 │ hello
+  │      ^

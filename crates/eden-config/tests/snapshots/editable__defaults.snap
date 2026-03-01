@@ -1,0 +1,25 @@
+---
+source: crates/eden-config/tests/editable.rs
+expression: "Config::no_clone_default()"
+---
+Config {
+    bot: Bot {
+        application_id: Id<ApplicationMarker>(1),
+        primary_guild: PrimaryGuild {
+            id: Id<GuildMarker>(1),
+            pompom: None,
+        },
+        token: Token(..),
+    },
+    database: Database {
+        primary: DatabasePool {
+            url: Memory {
+                original: None,
+            },
+            min_connections: 0,
+            max_connections: 1,
+            readonly: false,
+        },
+        replica: None,
+    },
+}

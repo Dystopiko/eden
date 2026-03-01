@@ -1,0 +1,8 @@
+---
+source: crates/eden-database/src/snowflake/mod.rs
+expression: error
+---
+ColumnDecode {
+    index: "0",
+    source: InvalidValueError,
+}

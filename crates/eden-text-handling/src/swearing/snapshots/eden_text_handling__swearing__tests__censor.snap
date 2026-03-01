@@ -1,0 +1,12 @@
+---
+source: crates/eden-text-handling/src/swearing/mod.rs
+expression: results
+---
+[
+    "How ******* dare you!",
+    "**** *****",
+    "**** *****",
+    "No bad words here!",
+    "hate you",
+    "balls",
+]

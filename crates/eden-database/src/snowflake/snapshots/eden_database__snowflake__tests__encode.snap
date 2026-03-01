@@ -1,0 +1,8 @@
+---
+source: crates/eden-database/src/snowflake/mod.rs
+expression: result.unwrap()
+---
+SqliteQueryResult {
+    changes: 0,
+    last_insert_rowid: 0,
+}

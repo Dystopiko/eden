@@ -1,0 +1,10 @@
+# Build files
+/target
+
+# Configuration and settings (including eden file itself)
+eden.toml
+eden.*.toml
+!eden.example.toml
+
+# Local environment files
+.env

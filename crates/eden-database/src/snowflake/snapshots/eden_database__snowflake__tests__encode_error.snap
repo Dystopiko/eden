@@ -1,0 +1,7 @@
+---
+source: crates/eden-database/src/snowflake/mod.rs
+expression: error
+---
+Encode(
+    "Encoding argument $1 failed: got invalid snowflake ID for 9223372036854775808 (out of bounds to i64)",
+)

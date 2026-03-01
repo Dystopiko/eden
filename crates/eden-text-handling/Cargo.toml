@@ -1,0 +1,34 @@
+[package]
+name = "eden-text-handling"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+twilight-mention = { workspace = true }
+twilight-model = { workspace = true }
+
+regex = "1.12.3"
+rustrict = { version = "0.7.26", features = ["customize"] }
+url = "2.5.8"
+comrak = { version = "0.50.0", default-features = false, features = ["bon"] }
+
+[dev-dependencies]
+criterion = { workspace = true }
+insta = { workspace = true }
+pretty_assertions = { workspace = true }
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "processing"
+harness = false
+path = "benches/processing.rs"
+
+[[bench]]
+name = "swearing"
+harness = false
+path = "benches/swearing.rs"

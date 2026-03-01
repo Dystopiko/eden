@@ -1,0 +1,11 @@
+---
+source: crates/eden-config/tests/editable.rs
+expression: output
+---
+food = "sandwich"
+[bot]
+application_id = "1"
+token = "abc"
+
+[bot.primary_guild]
+id = "1"

@@ -1,0 +1,28 @@
+[package]
+name = "eden-sqlite"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+bon = { workspace = true }
+error-stack = { workspace = true }
+futures = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+[dependencies.sqlx]
+version = "0.8.6"
+features = [
+    "chrono",
+    "migrate",
+    "runtime-tokio",
+    "sqlite",
+    "tls-rustls-aws-lc-rs"
+]
+
+[lints]
+workspace = true

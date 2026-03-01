@@ -1,0 +1,29 @@
+[package]
+name = "eden-config"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-common = { path = "../eden-common" }
+eden-toml = { path = "../eden-toml" }
+
+constant_time_eq = "0.4.2"
+url = "2.5.8"
+
+error-stack = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+toml_edit = { workspace = true }
+twilight-model = { workspace = true }
+
+[dev-dependencies]
+bon = { workspace = true }
+insta = { workspace = true }
+tempfile = { workspace = true }
+unindent = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,32 @@
+[package]
+name = "eden-database"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-sqlite = { path = "../eden-sqlite" }
+
+bon = { workspace = true }
+chrono = { workspace = true }
+error-stack = { workspace = true }
+serde = { workspace = true }
+sqlx = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+twilight-model = { workspace = true }
+uuid = { workspace = true }
+
+async-trait = "0.1.89"
+
+[dev-dependencies]
+eden-common = { path = "../eden-common" }
+
+claims = "0.8.0"
+insta = { workspace = true }
+
+[lints]
+workspace = true
