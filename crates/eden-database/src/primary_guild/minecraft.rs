@@ -10,7 +10,7 @@ use crate::{Snowflake, Timestamp};
 
 /// A Minecraft account linked to a primary guild member.
 #[derive(Debug, Clone, FromRow)]
-pub struct DbMinecraftAccount {
+pub struct McAccount {
     pub id: i32,
     pub linked_at: Timestamp,
     pub discord_user_id: Snowflake,
@@ -20,12 +20,12 @@ pub struct DbMinecraftAccount {
     pub kind: McAccountType,
 }
 
-impl DbMinecraftAccount {
+impl McAccount {
     pub async fn find_by_uuid(
         conn: &mut eden_sqlite::Connection,
         uuid: Uuid,
     ) -> Result<Option<Self>, Report<MinecraftAccountQueryError>> {
-        sqlx::query_as::<_, DbMinecraftAccount>(
+        sqlx::query_as::<_, McAccount>(
             r#"
             SELECT * FROM minecraft_accounts
             WHERE uuid = ?"#,
@@ -38,10 +38,10 @@ impl DbMinecraftAccount {
     }
 }
 
-impl DbMinecraftAccount {
+impl McAccount {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new<'a>() -> NewMinecraftAccountBuilder<'a> {
-        NewMinecraftAccount::builder()
+    pub fn new<'a>() -> NewMcAccountBuilder<'a> {
+        NewMcAccount::builder()
     }
 }
 
@@ -51,19 +51,19 @@ impl DbMinecraftAccount {
 pub struct MinecraftAccountQueryError;
 
 #[derive(Builder)]
-pub struct NewMinecraftAccount<'a> {
+pub struct NewMcAccount<'a> {
     pub discord_user_id: Id<UserMarker>,
     pub uuid: Uuid,
     pub username: &'a str,
     pub account_type: McAccountType,
 }
 
-impl<'a> NewMinecraftAccount<'a> {
+impl<'a> NewMcAccount<'a> {
     pub async fn create(
         &self,
         conn: &mut eden_sqlite::Transaction<'_>,
-    ) -> Result<DbMinecraftAccount, Report<MinecraftAccountQueryError>> {
-        sqlx::query_as::<_, DbMinecraftAccount>(
+    ) -> Result<McAccount, Report<MinecraftAccountQueryError>> {
+        sqlx::query_as::<_, McAccount>(
             r#"
             INSERT INTO minecraft_accounts (
                 discord_user_id, uuid, username, "type"
@@ -91,7 +91,7 @@ pub enum McAccountType {
     Bedrock,
 }
 
-impl DbMinecraftAccount {
+impl McAccount {
     /// Returns `true` if this account is a Java edition account.
     #[must_use]
     pub const fn is_java(&self) -> bool {
@@ -113,16 +113,15 @@ mod tests {
     use twilight_model::id::marker::UserMarker;
     use uuid::Uuid;
 
-    use crate::primary_guild::member::DbMember;
-    use crate::primary_guild::minecraft::{DbMinecraftAccount, McAccountType};
+    use crate::primary_guild::{McAccount, McAccountType, Member};
 
     #[must_use]
     async fn setup_member(
         conn: &mut eden_sqlite::Transaction<'_>,
         id: Id<UserMarker>,
         name: &str,
-    ) -> DbMember {
-        DbMember::upsert()
+    ) -> Member {
+        Member::upsert()
             .discord_user_id(id)
             .name(name)
             .build()
@@ -144,7 +143,7 @@ mod tests {
         let mut conn = pool.begin().await.unwrap();
         _ = setup_member(&mut conn, id, "john").await;
 
-        DbMinecraftAccount::new()
+        McAccount::new()
             .account_type(McAccountType::Java)
             .discord_user_id(id)
             .username("john")
@@ -155,7 +154,7 @@ mod tests {
             .unwrap();
 
         // Case #1: duplicated UUID and user's ID with different name
-        let result = DbMinecraftAccount::new()
+        let result = McAccount::new()
             .account_type(McAccountType::Java)
             .discord_user_id(id)
             .username("john2")
@@ -171,7 +170,7 @@ mod tests {
 
         // Case #2: duplicated UUID and user's ID with different account type
         //          (Bedrock XUID is different when it comes to generating it compared to Java UUID)
-        let result = DbMinecraftAccount::new()
+        let result = McAccount::new()
             .account_type(McAccountType::Bedrock)
             .discord_user_id(id)
             .username("john")
@@ -199,7 +198,7 @@ mod tests {
         let mut conn = pool.begin().await.unwrap();
         _ = setup_member(&mut conn, id, "john").await;
 
-        let account = DbMinecraftAccount::new()
+        let account = McAccount::new()
             .account_type(McAccountType::Java)
             .discord_user_id(id)
             .username("john")

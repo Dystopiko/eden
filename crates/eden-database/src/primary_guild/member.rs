@@ -10,19 +10,19 @@ use crate::{Snowflake, Timestamp};
 
 /// Represents a member who joined the primary guild's Minecraft server.
 #[derive(Debug, Clone, FromRow)]
-pub struct DbMember {
+pub struct Member {
     pub discord_user_id: Snowflake,
     pub joined_at: Timestamp,
     pub name: String,
     pub updated_at: Option<Timestamp>,
 }
 
-impl DbMember {
+impl Member {
     pub async fn find_by_discord_user_id(
         conn: &mut eden_sqlite::Connection,
         id: Snowflake,
     ) -> Result<Option<Self>, Report<MemberQueryError>> {
-        sqlx::query_as::<_, DbMember>(
+        sqlx::query_as::<_, Member>(
             r#"
             SELECT * FROM members
             WHERE discord_user_id = ?"#,
@@ -57,8 +57,8 @@ impl<'a> UpsertMember<'a> {
     pub async fn perform(
         &self,
         conn: &mut eden_sqlite::Transaction<'_>,
-    ) -> Result<DbMember, Report<MemberQueryError>> {
-        sqlx::query_as::<_, DbMember>(
+    ) -> Result<Member, Report<MemberQueryError>> {
+        sqlx::query_as::<_, Member>(
             r#"
             INSERT INTO members (discord_user_id, joined_at, name)
             VALUES (?, ?, ?)
