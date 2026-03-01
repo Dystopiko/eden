@@ -24,7 +24,7 @@ fn should_provide_defaults_on_create() {
     assert!(path.exists());
 
     let outcome = eden_common::path::read(&path).unwrap();
-    assert_eq!(outcome, include_str!("../eden.default.toml"));
+    assert_eq!(outcome, include_str!("../src/eden.default.toml"));
 }
 
 #[test]

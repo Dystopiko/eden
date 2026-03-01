@@ -79,7 +79,7 @@ impl Config {
         static DEFAULTS: LazyLock<(Config, Document<String>)> = LazyLock::new(|| {
             (|| {
                 let path = Path::new("<eden.default.toml>");
-                let contents = include_str!("../eden.default.toml");
+                let contents = include_str!("eden.default.toml");
 
                 let document = eden_toml::parse_document(contents, path)?;
                 let config = eden_toml::deserialize(&document, path)?;
