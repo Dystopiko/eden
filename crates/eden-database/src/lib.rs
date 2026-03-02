@@ -1,14 +1,13 @@
 pub mod migrations;
 pub mod primary_guild;
 pub mod snowflake;
-pub mod timestamp;
 
 use eden_sqlite::error::PoolError;
 use eden_sqlite::{PooledConnection, Transaction};
 use error_stack::Report;
 
 pub use self::snowflake::Snowflake;
-pub use eden_timestamp_type::Timestamp;
+pub use eden_timestamps::Timestamp;
 
 /// A trait for managing database connection pools with primary/replica support.
 ///

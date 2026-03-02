@@ -615,7 +615,7 @@ name = "eden-api-types"
 version = "0.2.0-alpha.0"
 dependencies = [
  "eden-database",
- "eden-timestamp-type",
+ "eden-timestamps",
  "insta",
  "serde",
  "serde_json",
@@ -668,7 +668,7 @@ dependencies = [
  "claims",
  "eden-common",
  "eden-sqlite",
- "eden-timestamp-type",
+ "eden-timestamps",
  "error-stack",
  "insta",
  "serde",
@@ -721,7 +721,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "eden-timestamp-type"
+name = "eden-timestamps"
 version = "0.2.0-alpha.0"
 dependencies = [
  "chrono",

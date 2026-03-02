@@ -12,7 +12,7 @@ default = ["server"]
 server = ["dep:eden-database"]
 
 [dependencies]
-eden-timestamp-type = { path = "../eden-timestamp-type" }
+eden-timestamps = { path = "../eden-timestamps" }
 serde = { workspace = true }
 twilight-model = { workspace = true }
 uuid = { workspace = true }

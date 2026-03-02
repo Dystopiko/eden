@@ -1,5 +1,5 @@
 [package]
-name = "eden-timestamp-type"
+name = "eden-timestamps"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

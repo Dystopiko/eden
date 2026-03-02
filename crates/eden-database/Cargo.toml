@@ -8,7 +8,7 @@ repository.workspace = true
 
 [dependencies]
 eden-sqlite = { path = "../eden-sqlite" }
-eden-timestamp-type = { path = "../eden-timestamp-type", features = ["sqlx"] }
+eden-timestamps = { path = "../eden-timestamps", features = ["sqlx"] }
 
 bon = { workspace = true }
 chrono = { workspace = true }
