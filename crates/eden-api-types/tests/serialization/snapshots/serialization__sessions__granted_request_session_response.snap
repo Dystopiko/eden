@@ -4,7 +4,7 @@ expression: json
 ---
 {
   "status": "granted",
-  "last_login_at": "2024-01-01T00:00:00+00:00",
+  "last_login_at": "2024-01-01T00:00:00.000Z",
   "perks": [
     "keep-inventory",
     "instant-restock",
@@ -13,6 +13,6 @@ expression: json
   "discord": {
     "id": "123456789012345678",
     "name": "john",
-    "joined_at": "2024-01-01T00:00:00+00:00"
+    "joined_at": "2024-01-01T00:00:00.000Z"
   }
 }

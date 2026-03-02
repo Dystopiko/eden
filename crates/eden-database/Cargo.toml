@@ -24,7 +24,7 @@ uuid = { workspace = true }
 [dev-dependencies]
 eden-common = { path = "../eden-common" }
 
-claims = "0.8.0"
+claims = { workspace = true }
 insta = { workspace = true }
 
 [lints]

@@ -1,4 +1,4 @@
-use eden_timestamp_type::Timestamp;
+use eden_timestamps::Timestamp;
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 use uuid::Uuid;

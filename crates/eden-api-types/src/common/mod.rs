@@ -1,4 +1,4 @@
-use eden_timestamp_type::Timestamp;
+use eden_timestamps::Timestamp;
 use serde::{Deserialize, Serialize};
 use twilight_model::id::{Id, marker::GuildMarker};
 

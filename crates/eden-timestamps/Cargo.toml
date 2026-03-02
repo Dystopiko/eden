@@ -12,6 +12,7 @@ serde = { workspace = true }
 sqlx = { workspace = true, optional = true }
 
 [dev-dependencies]
+claims = { workspace = true }
 eden-common = { path = "../eden-common" }
 eden-sqlite = { path = "../eden-sqlite" }
 
