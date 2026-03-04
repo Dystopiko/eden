@@ -30,15 +30,18 @@ pub enum PoolError {
 /// See: https://sqlite.org/rescode.html
 const SQLITE_CONSTRAINT_UNIQUE: &str = "2067";
 const SQLITE_CANTOPEN: &str = "14";
+const SQLITE_READONLY: &str = "8";
+const SQLITE_READONLY_ROLLBACK: &str = "776";
 
 /// A high-level classification of a SQLite error, used to drive error handling
 /// logic without requiring callers to inspect raw SQLite error codes directly.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SqlErrorType {
     Unknown,
     UnhealthyConnection,
     RowNotFound,
     UniqueViolation(String),
+    Readonly,
 }
 
 impl SqlErrorType {
@@ -64,6 +67,10 @@ impl SqlErrorType {
             }
             // https://sqlite.org/rescode.html#cantopen
             Some(SQLITE_CANTOPEN) => SqlErrorType::UnhealthyConnection,
+            // https://sqlite.org/rescode.html#readonly
+            Some(SQLITE_READONLY) => SqlErrorType::Readonly,
+            // https://sqlite.org/rescode.html#readonly_recovery
+            Some(SQLITE_READONLY_ROLLBACK) => SqlErrorType::Readonly,
             _ => SqlErrorType::Unknown,
         }
     }
@@ -71,22 +78,26 @@ impl SqlErrorType {
 
 /// Extension trait that classifies a [`Report`] into a [`SqlErrorType`].
 pub trait ReportExt {
-    fn sql_error_type(&self) -> Option<&SqlErrorType>;
+    fn sql_error_type(&self) -> Option<SqlErrorType>;
 }
 
 /// Extension trait that classifies an [`SqlErrorType`] from a [`Result`] type.
 pub trait ResultExt {
-    fn sql_error_type(&self) -> Option<&SqlErrorType>;
+    fn sql_error_type(&self) -> Option<SqlErrorType>;
 }
 
 impl<E> ReportExt for Report<E> {
-    fn sql_error_type(&self) -> Option<&SqlErrorType> {
-        self.downcast_ref::<SqlErrorType>()
+    fn sql_error_type(&self) -> Option<SqlErrorType> {
+        if let Some(error) = self.downcast_ref::<sqlx::Error>() {
+            Some(SqlErrorType::from_sqlx_error(error))
+        } else {
+            None
+        }
     }
 }
 
 impl<T, E> ResultExt for Result<T, Report<E>> {
-    fn sql_error_type(&self) -> Option<&SqlErrorType> {
+    fn sql_error_type(&self) -> Option<SqlErrorType> {
         let Err(error) = self else {
             return None;
         };

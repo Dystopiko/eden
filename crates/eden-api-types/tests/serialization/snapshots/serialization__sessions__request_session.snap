@@ -1,9 +1,0 @@
----
-source: crates/eden-api-types/tests/serialization/sessions.rs
-expression: json
----
-{
-  "uuid": "567458bd-d97f-4fe1-8123-6b380998acbe",
-  "ip": "192.168.0.1",
-  "bedrock": false
-}

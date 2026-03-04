@@ -1,5 +1,5 @@
 [package]
-name = "eden-api-server"
+name = "eden-gateway-server"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -7,19 +7,34 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-eden-api-types = { path = "../eden-api-types" }
 eden-common = { path = "../eden-common" }
 eden-database = { path = "../eden-database" }
 eden-kernel = { path = "../eden-kernel" }
 eden-sqlite = { path = "../eden-sqlite" }
 
+tower = "0.5.3"
+tower-layer = "0.3.3"
+tower-service = "0.3.3"
+
 error-stack = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
 tracing = { workspace = true }
+twilight-model = { workspace = true }
+uuid = { workspace = true }
 
 [dependencies.axum]
 version = "0.8.8"
 default-features = false
 features = ["http1", "json", "query", "tokio", "tower-log", "tracing"]
+
+[dev-dependencies]
+claims = { workspace = true }
+insta = { workspace = true }
+pretty_assertions = { workspace = true }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true

@@ -1,0 +1,8 @@
+---
+source: crates/eden-gateway-server/src/error/tests.rs
+expression: json
+---
+{
+  "code": "READONLY_MODE",
+  "message": "Eden is temporarily operating in read-only mode. Check the announcements for updates from a server administrator and try again later."
+}
