@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 bon = { workspace = true }
+erased-report = { workspace = true }
 error-stack = { workspace = true }
 futures = { workspace = true }
 thiserror = { workspace = true }

@@ -1,4 +1,5 @@
-use eden_sqlite::error::{PoolError, SqlErrorType};
+use eden_sqlite::error::{PoolError, ReportExt, SqlErrorType};
+use erased_report::ErasedReport;
 use error_stack::{Report, ResultExt};
 use mime::Mime;
 use std::borrow::Cow;
@@ -13,7 +14,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::result::{ApiError, ApiErrorCode, ErasedReport};
+use crate::result::{ApiError, ErrorCode};
 
 #[derive(Debug, Error)]
 #[error("failed to convert plain-text error body to JSON")]
@@ -70,7 +71,7 @@ async fn jsonify_plain_text_error(res: Response) -> Result<Response, Report<Json
     parts.headers.remove(header::CONTENT_LENGTH);
 
     let payload = ApiError {
-        code: ApiErrorCode::InvalidRequest,
+        code: ErrorCode::InvalidRequest,
         message: Cow::Owned(message),
         request_id: None,
     };
@@ -136,7 +137,7 @@ mod tests {
     use thiserror::Error;
     use tower::ServiceExt;
 
-    use crate::result::{ApiError, ApiErrorCode, ApiResult};
+    use crate::result::{ApiError, ApiResult, ErrorCode};
 
     #[must_use]
     fn build_app() -> Router {
@@ -147,7 +148,7 @@ mod tests {
 
         async fn custom_error_handler() -> Result<String, ApiError> {
             Err(ApiError {
-                code: ApiErrorCode::InvalidRequest,
+                code: ErrorCode::InvalidRequest,
                 message: Cow::Borrowed("Why"),
                 request_id: None,
             })
@@ -197,7 +198,7 @@ mod tests {
         assert_eq!(parts.status, StatusCode::UNSUPPORTED_MEDIA_TYPE);
 
         let expected = expected_json(&ApiError {
-            code: ApiErrorCode::InvalidRequest,
+            code: ErrorCode::InvalidRequest,
             message: Cow::Borrowed("Expected request with `Content-Type: application/json`"),
             request_id: None,
         });
@@ -210,7 +211,7 @@ mod tests {
         assert_eq!(parts.status, StatusCode::BAD_REQUEST);
 
         let expected = expected_json(&ApiError {
-            code: ApiErrorCode::InvalidRequest,
+            code: ErrorCode::InvalidRequest,
             message: Cow::Borrowed("Why"),
             request_id: None,
         });

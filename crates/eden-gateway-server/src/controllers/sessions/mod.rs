@@ -15,7 +15,7 @@ use axum::{
 
 use crate::{
     controllers::Kernel,
-    result::{ApiError, ApiErrorCode, ApiResult},
+    result::{ApiError, ApiResult, ErrorCode},
 };
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -61,11 +61,9 @@ pub async fn try_grant(
 
 fn validate_mc_account_with_body(account: &McAccount, body: &RequestSession) -> ApiResult<()> {
     if account.is_bedrock() != body.bedrock {
-        return Err(ApiError::from_static(
-            ApiErrorCode::InvalidRequest,
-            "Incompatible account type",
-        )
-        .into());
+        return Err(
+            ApiError::from_static(ErrorCode::InvalidRequest, "Incompatible account type").into(),
+        );
     }
 
     Ok(())

@@ -1,0 +1,18 @@
+[package]
+name = "erased-report"
+description = "Type erased Report support for error-stack"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+error-stack = { workspace = true }
+
+[dev-dependencies]
+claims = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

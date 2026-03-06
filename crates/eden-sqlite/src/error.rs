@@ -1,3 +1,4 @@
+use erased_report::ErasedReport;
 use error_stack::Report;
 use sqlx::error::DatabaseError;
 use sqlx::sqlite::SqliteError;
@@ -96,7 +97,26 @@ impl<E> ReportExt for Report<E> {
     }
 }
 
+impl ReportExt for ErasedReport {
+    fn sql_error_type(&self) -> Option<SqlErrorType> {
+        if let Some(error) = self.downcast_ref::<sqlx::Error>() {
+            Some(SqlErrorType::from_sqlx_error(error))
+        } else {
+            None
+        }
+    }
+}
+
 impl<T, E> ResultExt for Result<T, Report<E>> {
+    fn sql_error_type(&self) -> Option<SqlErrorType> {
+        let Err(error) = self else {
+            return None;
+        };
+        error.sql_error_type()
+    }
+}
+
+impl<T> ResultExt for Result<T, ErasedReport> {
     fn sql_error_type(&self) -> Option<SqlErrorType> {
         let Err(error) = self else {
             return None;
@@ -125,14 +145,30 @@ pub trait QueryResultExt: Sized {
     /// - If the result is an `Err` whose attached [`SqlErrorType`] is
     ///   [`SqlErrorType::RowNotFound`], returns `Ok(None)`.
     /// - Any other error is returned as-is.
-    fn optional(self) -> Result<Option<Self::Okay>, Report<Self::Err>>;
+    fn optional(self) -> Result<Option<Self::Okay>, Self::Err>;
 }
 
 impl<T, E> QueryResultExt for Result<T, Report<E>> {
     type Okay = T;
-    type Err = E;
+    type Err = Report<E>;
 
     fn optional(self) -> Result<Option<T>, Report<E>> {
+        match self {
+            // Query succeeded — wrap the value in Some.
+            Ok(okay) => Ok(Some(okay)),
+            // Query failed with RowNotFound — treat as a successful empty result.
+            Err(..) if matches!(self.sql_error_type(), Some(SqlErrorType::RowNotFound)) => Ok(None),
+            // Any other error — propagate as-is.
+            Err(error) => Err(error),
+        }
+    }
+}
+
+impl<T> QueryResultExt for Result<T, ErasedReport> {
+    type Okay = T;
+    type Err = ErasedReport;
+
+    fn optional(self) -> Result<Option<T>, ErasedReport> {
         match self {
             // Query succeeded — wrap the value in Some.
             Ok(okay) => Ok(Some(okay)),
