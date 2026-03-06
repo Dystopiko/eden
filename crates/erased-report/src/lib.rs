@@ -28,7 +28,7 @@
 //! struct MyError;
 //!
 //! let report: Report<MyError> = Report::new(MyError);
-//! let erased: ErasedReport = ErasedReport::new(report);
+//! let erased: ErasedReport = ErasedReport::from_report(report);
 //! ```
 //!
 //! ## Using the `EraseReportExt` convenience method
