@@ -1,4 +1,4 @@
-use crate::result::ApiError;
+use crate::errors::ApiError;
 
 #[test]
 fn test_serialization() {

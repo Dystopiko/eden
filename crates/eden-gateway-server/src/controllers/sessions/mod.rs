@@ -15,10 +15,10 @@ use axum::{
 };
 
 use crate::{
-    controllers::Kernel,
+    controllers::{ApiResult, Kernel},
+    errors::{ApiError, ErrorCode},
     middleware::trace_request::RequestLogs,
     model::MemberView,
-    result::{ApiError, ApiResult, ErrorCode},
 };
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -45,13 +45,15 @@ pub async fn try_grant(
         .await
         .optional()?;
 
-    let mut member = None;
     logs.add("account.exists", account.is_some());
 
-    if let Some(account) = account {
-        logs.add("account.kind", account.uuid);
-        member = Some(acquire_member(&mut conn, &account, &body).await?);
-    }
+    let member = match account {
+        None => None,
+        Some(account) => {
+            logs.add("account.bedrock", account.is_bedrock());
+            Some(acquire_member(&mut conn, &account, &body).await?)
+        }
+    };
 
     let payload = Json(SessionGranted {
         last_login_at: None,
@@ -67,13 +69,14 @@ async fn acquire_member(
     account: &McAccount,
     body: &RequestSession,
 ) -> ApiResult<MemberView> {
-    let member = Member::find_by_discord_user_id(conn, account.discord_user_id).await?;
     if account.is_bedrock() != body.bedrock {
         return Err(ApiError::from_static(
             ErrorCode::InvalidRequest,
-            "Incompatible account type",
-        ))?;
+            "Incompatible Minecraft account type",
+        )
+        .into());
     }
 
+    let member = Member::find_by_discord_user_id(conn, account.discord_user_id).await?;
     Ok(member.into())
 }

@@ -12,13 +12,11 @@ use uuid::Uuid;
 
 use crate::middleware::extract_client_ip::ClientIp;
 
-/// A request scoped unique identifier, injected by [`trace_request::middleware`]
-/// into both request and response extensions.
+/// A request-scoped unique identifier injected by [`middleware`] into both
+/// request and response extensions.
 ///
-/// This is to easily track the original request if the user reported a problem
-/// related to the gateway API server.
-///
-/// [`trace_request::middleware`]: crate::middleware::trace_request::middleware
+/// Included in error responses as `X-Request-ID` so that clients can correlate
+/// a reported problem with server-side logs.
 #[derive(Clone, Copy)]
 pub struct RequestId(pub Uuid);
 
@@ -33,6 +31,8 @@ pub struct RequestMetadata {
 
 const X_REQUEST_ID: HeaderName = HeaderName::from_static("x-request-id");
 
+/// Records a structured tracing span for each incoming HTTP request and appends
+/// an `X-Request-ID` header to non-routing-failure responses.
 pub async fn middleware(
     metadata: RequestMetadata,
     mut req: Request,
@@ -54,8 +54,9 @@ pub async fn middleware(
 
     let span = tracing::info_span!(
         "http.request",
-        client.ip = %*metadata.client_ip.0,
-        request.id = %metadata.method,
+        client.ip = %**metadata.client_ip,
+        request.id = %id,
+        request.method = %metadata.method,
         request.uri = %metadata.uri,
         request.path = %matched_path,
         request.user_agent = ?user_agent,
@@ -63,7 +64,6 @@ pub async fn middleware(
     );
 
     let start = Instant::now();
-
     let mut response = next.run(req).instrument(span.clone()).await;
     let duration = start.elapsed();
 
@@ -87,9 +87,9 @@ pub async fn middleware(
 
     span.in_scope(|| {
         tracing::trace!(
-            "{method} {url} -> {status} ({duration:?})",
+            "{method} {uri} -> {status} ({duration:?})",
             method = metadata.method,
-            url = metadata.uri,
+            uri = metadata.uri,
             status = status.as_str(),
         );
     });
@@ -97,13 +97,18 @@ pub async fn middleware(
     response
 }
 
+/// A request-scoped key-value store for attaching structured metadata to the
+/// active tracing span.
+///
+/// Injected into request extensions by [`middleware`] and available to
+/// controllers via [`Extension<RequestLogs>`].
 #[derive(Clone, Debug, Default)]
 pub struct RequestLogs(Arc<DashMap<&'static str, String>>);
 
 impl RequestLogs {
+    /// Inserts or updates a metadata entry with the given key and value.
     pub fn add<V: std::fmt::Display>(&self, key: &'static str, value: V) {
-        let metadata = &self.0;
-        metadata.insert(key, value.to_string());
+        self.0.insert(key, value.to_string());
     }
 }
 

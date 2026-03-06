@@ -28,7 +28,6 @@ pub fn init_tracing() {
 
     let fmt_layer = tracing_subscriber::fmt::layer()
         .without_time()
-        .pretty()
         .with_filter(env_filter);
 
     tracing_subscriber::registry().with(fmt_layer).init();

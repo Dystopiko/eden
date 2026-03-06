@@ -1,5 +1,5 @@
 ---
-source: crates/eden-gateway-server/src/result/tests.rs
+source: crates/eden-gateway-server/src/errors/tests.rs
 expression: json
 ---
 {

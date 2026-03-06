@@ -7,8 +7,8 @@ use eden_kernel::Kernel;
 use std::sync::Arc;
 
 use crate::controllers::*;
+use crate::errors::ApiError;
 use crate::middleware::{extract_client_ip, normalize_error, trace_request};
-use crate::result::ApiError;
 
 #[must_use]
 pub fn build(kernel: Arc<Kernel>) -> Router<()> {
