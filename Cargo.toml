@@ -15,6 +15,7 @@ chrono = { version = "0.4.44", features = ["serde"] }
 uuid = { version = "1.21.0", features = ["v4", "serde"] }
 
 # Error handling
+erased-report = { path = "crates/erased-report" }
 error-stack = "0.6.0"
 thiserror = "2.0.18"
 
