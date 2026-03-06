@@ -7,7 +7,6 @@ use error_stack::{Report, ResultExt};
 use std::sync::Arc;
 
 #[derive(Debug, Builder)]
-#[builder(start_fn(name = "builder_internal", vis = ""))]
 #[builder(finish_fn(name = "build_inner", vis = ""))]
 pub struct Kernel {
     /// App configuration

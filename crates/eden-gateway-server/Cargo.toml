@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 eden-common = { path = "../eden-common" }
+eden-config = { path = "../eden-config" }
 eden-database = { path = "../eden-database" }
 eden-kernel = { path = "../eden-kernel" }
 eden-sqlite = { path = "../eden-sqlite" }
@@ -21,9 +22,11 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }
+thiserror = { workspace = true }
 tracing = { workspace = true }
 twilight-model = { workspace = true }
 uuid = { workspace = true }
+mime = "0.3.17"
 
 [dependencies.axum]
 version = "0.8.8"
@@ -34,7 +37,6 @@ features = ["http1", "json", "query", "tokio", "tower-log", "tracing"]
 claims = { workspace = true }
 insta = { workspace = true }
 pretty_assertions = { workspace = true }
-thiserror = { workspace = true }
 
 [lints]
 workspace = true

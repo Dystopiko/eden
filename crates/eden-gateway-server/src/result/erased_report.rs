@@ -3,6 +3,7 @@ use eden_sqlite::error::{ReportExt, SqlErrorType};
 use error_stack::Report;
 use std::fmt;
 use std::sync::Arc;
+use thiserror::Error;
 
 use crate::result::ApiError;
 
@@ -77,8 +78,22 @@ where
     }
 }
 
+impl From<ApiError> for ErasedReport {
+    fn from(value: ApiError) -> Self {
+        #[derive(Debug, Error)]
+        #[error("Caught API error while performing a request")]
+        struct InnerReport;
+
+        Self::new(Report::new(InnerReport).attach_opaque(value))
+    }
+}
+
 impl IntoResponse for ErasedReport {
     fn into_response(self) -> Response {
+        if let Some(error) = self.downcast_ref::<ApiError>() {
+            return error.clone().into_response();
+        }
+
         let mut res = ApiError::INTERNAL.into_response();
         res.extensions_mut().insert(Arc::new(self));
         res

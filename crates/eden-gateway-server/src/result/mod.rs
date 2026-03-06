@@ -17,7 +17,7 @@ mod tests;
 
 pub type ApiResult<T> = std::result::Result<T, ErasedReport>;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ApiError {
     pub code: ApiErrorCode,
     pub message: Cow<'static, str>,
@@ -52,7 +52,7 @@ impl ApiError {
     );
 
     #[must_use]
-    const fn from_static(code: ApiErrorCode, message: &'static str) -> Self {
+    pub(crate) const fn from_static(code: ApiErrorCode, message: &'static str) -> Self {
         Self {
             code,
             message: Cow::Borrowed(message),
@@ -66,35 +66,6 @@ impl ApiError {
         self
     }
 }
-
-// impl<E: StdError> From<Report<E>> for Error {
-//     fn from(report: Report<E>) -> Self {
-//         // if let Some(error) = report.downcast_ref::<PoolError>() {
-//         //     match error {
-//         //         PoolError::General => {
-//         //             tracing::error!(error = ?report, "encountered a pool error");
-//         //             return Error::INTERNAL;
-//         //         }
-//         //         PoolError::Unhealthy => return Error::SERVICE_UNAVAILABLE,
-//         //     };
-//         // }
-
-//         // if let Some(kind) = report.sql_error_type() {
-//         //     match kind {
-//         //         SqlErrorType::Readonly => return Error::READONLY_MODE,
-//         //         SqlErrorType::UnhealthyConnection => return Error::SERVICE_UNAVAILABLE,
-//         //         SqlErrorType::Unknown => {
-//         //             tracing::error!(error = ?report, "encountered a database error");
-//         //             return Error::INTERNAL;
-//         //         }
-//         //         _ => {}
-//         //     };
-//         // }
-
-//         // tracing::error!(error = ?report, "unhandled error while processing request");
-//         Error::INTERNAL
-//     }
-// }
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
