@@ -105,6 +105,15 @@ impl McAccount {
     }
 }
 
+impl std::fmt::Display for McAccountType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Java => f.write_str("java"),
+            Self::Bedrock => f.write_str("bedrock"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use claims::assert_err;

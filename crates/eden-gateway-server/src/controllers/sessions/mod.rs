@@ -8,6 +8,7 @@ use std::net::IpAddr;
 use uuid::Uuid;
 
 use axum::{
+    Extension,
     extract::Json,
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -15,6 +16,7 @@ use axum::{
 
 use crate::{
     controllers::Kernel,
+    middleware::trace_request::RequestLogs,
     result::{ApiError, ApiResult, ErrorCode},
 };
 
@@ -34,6 +36,7 @@ pub struct SessionGranted {
 
 pub async fn try_grant(
     Kernel(kernel): Kernel,
+    Extension(logs): Extension<RequestLogs>,
     Json(body): Json<RequestSession>,
 ) -> ApiResult<Response> {
     let mut conn = kernel.db_read().await?;
@@ -43,7 +46,10 @@ pub async fn try_grant(
         .optional()?;
 
     let mut has_member_data = false;
+    logs.add("account.exists", account.is_some());
+
     if let Some(account) = account {
+        logs.add("account.kind", account.kind);
         validate_mc_account_with_body(&account, &body)?;
 
         _ = Member::find_by_discord_user_id(&mut conn, account.discord_user_id).await?;
@@ -61,9 +67,10 @@ pub async fn try_grant(
 
 fn validate_mc_account_with_body(account: &McAccount, body: &RequestSession) -> ApiResult<()> {
     if account.is_bedrock() != body.bedrock {
-        return Err(
-            ApiError::from_static(ErrorCode::InvalidRequest, "Incompatible account type").into(),
-        );
+        return Err(ApiError::from_static(
+            ErrorCode::InvalidRequest,
+            "Incompatible account type",
+        ))?;
     }
 
     Ok(())

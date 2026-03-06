@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::{TypedHeader, headers::UserAgent};
 use dashmap::DashMap;
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 use tracing::Instrument;
 use uuid::Uuid;
 
@@ -41,8 +41,8 @@ pub async fn middleware(
     let id = Uuid::new_v4();
     req.extensions_mut().insert(RequestId(id));
 
-    let logged_metadata = LoggedMetadata::default();
-    req.extensions_mut().insert(logged_metadata.clone());
+    let request_logs = RequestLogs::default();
+    req.extensions_mut().insert(request_logs.clone());
 
     let matched_path = metadata
         .matched_path
@@ -80,7 +80,7 @@ pub async fn middleware(
 
     if !span.is_disabled() {
         let logged_metadata =
-            serde_json::to_string(&*logged_metadata).unwrap_or_else(|_| String::from("{}"));
+            serde_json::to_string(&*request_logs).unwrap_or_else(|_| String::from("{}"));
 
         span.record("request.metadata", tracing::field::display(logged_metadata));
     }
@@ -98,16 +98,16 @@ pub async fn middleware(
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct LoggedMetadata(DashMap<&'static str, String>);
+pub struct RequestLogs(Arc<DashMap<&'static str, String>>);
 
-impl LoggedMetadata {
+impl RequestLogs {
     pub fn add<V: std::fmt::Display>(&self, key: &'static str, value: V) {
         let metadata = &self.0;
         metadata.insert(key, value.to_string());
     }
 }
 
-impl std::ops::Deref for LoggedMetadata {
+impl std::ops::Deref for RequestLogs {
     type Target = DashMap<&'static str, String>;
 
     fn deref(&self) -> &Self::Target {
