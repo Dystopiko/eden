@@ -28,11 +28,22 @@ tracing = { workspace = true }
 twilight-model = { workspace = true }
 uuid = { workspace = true }
 mime = "0.3.17"
+axum-extra = { version = "0.12.5", features = ["typed-header"] }
+dashmap = { version = "6.1.0", features = ["serde"] }
 
 [dependencies.axum]
 version = "0.8.8"
 default-features = false
-features = ["http1", "json", "query", "tokio", "tower-log", "tracing"]
+features = [
+    "http1",
+    "json",
+    "macros",
+    "matched-path",
+    "query",
+    "tokio",
+    "tower-log",
+    "tracing"
+]
 
 [dev-dependencies]
 claims = { workspace = true }

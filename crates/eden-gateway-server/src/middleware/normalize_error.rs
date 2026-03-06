@@ -6,6 +6,7 @@ use std::borrow::Cow;
 use std::str::FromStr;
 use std::sync::Arc;
 use thiserror::Error;
+use uuid::Uuid;
 
 use axum::{
     extract::{Json, Request},
@@ -14,7 +15,10 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::result::{ApiError, ErrorCode};
+use crate::{
+    middleware::trace_request::RequestId,
+    result::{ApiError, ErrorCode},
+};
 
 #[derive(Debug, Error)]
 #[error("failed to convert plain-text error body to JSON")]
@@ -34,23 +38,33 @@ pub async fn middleware(req: Request, next: Next) -> impl IntoResponse {
         return res;
     }
 
+    // Try to get the associated request ID to be easily traceable soon.
+    let request_id = res.extensions().get::<RequestId>().map(|v| v.0);
+
     // Try to get the erased report data via extensions
     if let Some(report) = take_erased_report(&mut res) {
-        return report_to_api_error(report).into_response();
+        return report_to_api_error(report)
+            .maybe_request_id(request_id)
+            .into_response();
     }
 
-    match jsonify_plain_text_error(res).await {
+    match jsonify_plain_text_error(res, request_id).await {
         Ok(converted) => converted,
         Err(err) => {
             tracing::error!(error = ?err, "failed to jsonify plain-text error response");
-            ApiError::INTERNAL.into_response()
+            ApiError::INTERNAL
+                .maybe_request_id(request_id)
+                .into_response()
         }
     }
 }
 
 /// Converts a `text/plain; charset=utf-8` error body into a JSON `ApiError`.
 /// Responses with any other content type are returned unchanged.
-async fn jsonify_plain_text_error(res: Response) -> Result<Response, Report<JsonifyError>> {
+async fn jsonify_plain_text_error(
+    res: Response,
+    request_id: Option<Uuid>,
+) -> Result<Response, Report<JsonifyError>> {
     const MAX_BODY_BYTES: usize = 1_000_000;
 
     let (mut parts, body) = res.into_parts();
@@ -73,7 +87,7 @@ async fn jsonify_plain_text_error(res: Response) -> Result<Response, Report<Json
     let payload = ApiError {
         code: ErrorCode::InvalidRequest,
         message: Cow::Owned(message),
-        request_id: None,
+        request_id,
     };
 
     Ok((parts, Json(payload)).into_response())

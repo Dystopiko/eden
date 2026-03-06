@@ -7,12 +7,15 @@ use eden_kernel::Kernel;
 use std::sync::Arc;
 
 use crate::controllers::*;
-use crate::middleware::normalize_error;
+use crate::middleware::{extract_client_ip, normalize_error, trace_request};
 use crate::result::ApiError;
 
 #[must_use]
 pub fn build(kernel: Arc<Kernel>) -> Router<()> {
-    let middleware = tower::ServiceBuilder::new().layer(from_fn(normalize_error::middleware));
+    let middleware = tower::ServiceBuilder::new()
+        .layer(from_fn(extract_client_ip::middleware))
+        .layer(from_fn(trace_request::middleware))
+        .layer(from_fn(normalize_error::middleware));
 
     let router = Router::new()
         .route("/", get(index))

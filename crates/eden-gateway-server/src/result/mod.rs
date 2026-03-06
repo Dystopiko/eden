@@ -68,6 +68,13 @@ impl ApiError {
         self.request_id = Some(id);
         self
     }
+
+    /// Attaches a maybe [`Some`] request ID to correlate this error with server-side logs.
+    #[must_use]
+    pub fn maybe_request_id(mut self, id: Option<Uuid>) -> Self {
+        self.request_id = id;
+        self
+    }
 }
 
 impl IntoResponse for ApiError {
