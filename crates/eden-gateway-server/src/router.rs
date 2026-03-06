@@ -19,7 +19,7 @@ pub fn build(kernel: Arc<Kernel>) -> Router<()> {
 
     let router = Router::new()
         .route("/", get(index))
-        .route("/sessions", post(sessions::try_grant));
+        .route("/sessions", post(sessions::grant::grant));
 
     router
         .layer(middleware)
