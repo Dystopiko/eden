@@ -2,7 +2,7 @@ use axum::extract::Json;
 use axum::http::{Method, StatusCode};
 use axum::middleware::from_fn;
 use axum::response::IntoResponse;
-use axum::routing::{Router, get, post};
+use axum::routing::{Router, get, post, put};
 use eden_kernel::Kernel;
 use std::sync::Arc;
 
@@ -19,6 +19,10 @@ pub fn build(kernel: Arc<Kernel>) -> Router<()> {
 
     let router = Router::new()
         .route("/", get(index))
+        .route(
+            "/alerts/admin_commands",
+            put(alert::admin_commands::publish),
+        )
         .route("/sessions", post(session::grant::grant));
 
     router

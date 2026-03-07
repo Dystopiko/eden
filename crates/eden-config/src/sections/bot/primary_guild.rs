@@ -1,12 +1,15 @@
 use serde::Deserialize;
 use twilight_model::id::Id;
-use twilight_model::id::marker::{GuildMarker, UserMarker};
+use twilight_model::id::marker::{ChannelMarker, GuildMarker, UserMarker};
 
 /// Configuration for the primary guild for Eden.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct PrimaryGuild {
     /// Eden's primary guild/server's ID.
     pub id: Id<GuildMarker>,
+
+    /// Designated channel for alerts
+    pub alert_channel_id: Id<ChannelMarker>,
 
     /// Configuration for Chaos (chaosneco) auto-trigger
     #[serde(default)]

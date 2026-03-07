@@ -8,7 +8,7 @@ repository.workspace = true
 
 [dependencies]
 eden-sqlite = { path = "../eden-sqlite" }
-eden-timestamps = { path = "../eden-timestamps", features = ["sqlx"] }
+eden-timestamps = { path = "../eden-timestamps", features = ["sqlx", "twilight"] }
 
 bon = { workspace = true }
 error-stack = { workspace = true }

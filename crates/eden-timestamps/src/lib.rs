@@ -26,6 +26,14 @@ impl Timestamp {
         Self(Utc::now())
     }
 
+    /// Converts [`Timestamp`] into twilight's own `Timestamp` object.
+    #[cfg(feature = "twilight")]
+    #[must_use]
+    pub fn into_twilight(self) -> twilight_model::util::Timestamp {
+        use twilight_model::util::Timestamp;
+        Timestamp::from_str(&self.to_string()).expect("RFC 3339 is compilant with ISO 8601 format")
+    }
+
     /// Parses a timestamp from an RFC 3339 date and time string.
     pub fn parse(input: &str) -> Result<Self, TimestampParseError> {
         DateTime::parse_from_rfc3339(input)

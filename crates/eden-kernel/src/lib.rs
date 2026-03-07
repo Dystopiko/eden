@@ -12,6 +12,9 @@ pub struct Kernel {
     /// App configuration
     pub config: Arc<Config>,
 
+    /// Discord Rest API client
+    pub discord: Arc<twilight_http::Client>,
+
     /// Database connection pool connected to the primary database
     pub primary_db: Pool,
 
@@ -23,6 +26,24 @@ pub struct Kernel {
 }
 
 impl<S: kernel_builder::State> KernelBuilder<S> {
+    /// Initializes Discord HTTP client field lazily from the provided
+    /// [Discord bot configuration].
+    ///
+    /// [Discord bot configuration]: eden_config::sections::Bot
+    pub fn discord_from_config(
+        self,
+        config: &eden_config::sections::Bot,
+    ) -> KernelBuilder<kernel_builder::SetDiscord<S>>
+    where
+        S::Discord: kernel_builder::IsUnset,
+    {
+        let discord = twilight_http::Client::builder()
+            .token(config.token.as_str().to_string())
+            .build();
+
+        self.discord(Arc::new(discord))
+    }
+
     /// Initializes `primary_db` and `replica_db` fields lazily from the
     /// provided [database configuration].
     ///
