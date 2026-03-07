@@ -677,7 +677,6 @@ dependencies = [
  "toml_edit",
  "twilight-model",
  "unindent",
- "url",
 ]
 
 [[package]]
@@ -685,7 +684,6 @@ name = "eden-database"
 version = "0.2.0-alpha.0"
 dependencies = [
  "bon",
- "chrono",
  "claims",
  "eden-common",
  "eden-sqlite",
@@ -710,7 +708,6 @@ dependencies = [
  "claims",
  "dashmap",
  "eden-common",
- "eden-config",
  "eden-database",
  "eden-kernel",
  "eden-sqlite",
@@ -751,11 +748,9 @@ dependencies = [
  "bon",
  "erased-report",
  "error-stack",
- "futures",
  "sqlx",
  "thiserror",
  "tokio",
- "tracing",
 ]
 
 [[package]]
@@ -768,8 +763,6 @@ dependencies = [
  "pretty_assertions",
  "regex",
  "rustrict",
- "twilight-mention",
- "twilight-model",
  "url",
 ]
 
@@ -2855,15 +2848,6 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
-]
-
-[[package]]
-name = "twilight-mention"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4aebfdf7f045520f52ad09d2c2cd50f138afccccbf92a2647d463d7d04e10b0"
-dependencies = [
- "twilight-model",
 ]
 
 [[package]]

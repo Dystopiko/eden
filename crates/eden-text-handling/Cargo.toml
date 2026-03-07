@@ -7,9 +7,6 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-twilight-mention = { workspace = true }
-twilight-model = { workspace = true }
-
 regex = "1.12.3"
 rustrict = { version = "0.7.26", features = ["customize"] }
 url = "2.5.8"

@@ -10,10 +10,8 @@ repository.workspace = true
 bon = { workspace = true }
 erased-report = { workspace = true }
 error-stack = { workspace = true }
-futures = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-tracing = { workspace = true }
 
 [dependencies.sqlx]
 version = "0.8.6"
