@@ -6,13 +6,13 @@ use thiserror::Error;
 #[error("Failed to initialize rustls crypto provider")]
 pub struct InitRustlsError;
 
-/// Installs the default [`aws_lc_rs`] crypto provider for [`rustls`].
+/// Installs the default [`ring`] crypto provider for [`rustls`].
 ///
 /// **This function must be called preferably before every Eden-provided binary starts.**
 ///
-/// [`aws_lc_rs`]: rustls::crypto::aws_lc_rs
+/// [`ring`]: rustls::crypto::ring
 pub fn init_rustls() -> Result<(), Report<InitRustlsError>> {
-    rustls::crypto::aws_lc_rs::default_provider()
+    rustls::crypto::ring::default_provider()
         .install_default()
         .map_err(|_| Report::new(InitRustlsError))
 }

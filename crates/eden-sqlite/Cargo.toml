@@ -10,18 +10,9 @@ repository.workspace = true
 bon = { workspace = true }
 erased-report = { workspace = true }
 error-stack = { workspace = true }
+sqlx = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-
-[dependencies.sqlx]
-version = "0.8.6"
-features = [
-    "chrono",
-    "migrate",
-    "runtime-tokio",
-    "sqlite",
-    "tls-rustls-aws-lc-rs"
-]
 
 [lints]
 workspace = true

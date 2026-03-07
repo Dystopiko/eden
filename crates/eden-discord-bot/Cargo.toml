@@ -31,7 +31,6 @@ unindent = { workspace = true }
 
 async-trait = "0.1.89"
 crossbeam = "0.8.4"
-rustls = "0.23.36"
 splinter = { git = "https://github.com/memothelemo/splinter", rev = "479d7dd" }
 twilight-standby = "0.17.0"
 
