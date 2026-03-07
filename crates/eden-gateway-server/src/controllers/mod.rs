@@ -2,7 +2,7 @@ use axum::extract::{FromRequestParts, Json};
 use serde_json::{Value, json};
 use std::sync::Arc;
 
-pub mod sessions;
+pub mod session;
 
 pub async fn index() -> Json<Value> {
     Json(json!({ "hello": "world" }))
