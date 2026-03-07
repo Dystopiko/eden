@@ -28,7 +28,7 @@ pub struct PublishAlert {
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum Executor {
     Console,
     Player {
@@ -49,15 +49,17 @@ pub async fn publish(
 
     let embed = generate_alert_embed(&body);
     let content = match &body.executor {
-        Executor::Console => Cow::Borrowed("Someone used a privileged command!!"),
+        Executor::Console => Cow::Borrowed("**Someone used a privileged command!!**"),
         Executor::Player { username, .. } => {
-            Cow::Owned(format!("{username} used a privileged command!!"))
+            Cow::Owned(format!("**{username} used a privileged command!!**"))
         }
     };
 
-    kernel
+    let request = kernel
         .discord
-        .create_message(kernel.config.bot.primary_guild.alert_channel_id)
+        .create_message(kernel.config.bot.primary_guild.alert_channel_id);
+
+    request
         .content(&*content)
         .embeds(&[embed])
         .perform()
@@ -69,7 +71,7 @@ pub async fn publish(
 // https://github.com/memothelemo/albasset/blob/master/src/main/kotlin/xyz/memothelemo/albasset/alert/AdminCommandExecutedAlert.kt
 fn generate_alert_embed(body: &PublishAlert) -> Embed {
     let mut embed = EmbedBuilder::new()
-        .title(format!("/`{}`", body.command))
+        .title(format!("`{}`", body.command))
         .timestamp(Timestamp::now().into_twilight());
 
     embed = match &body.executor {
@@ -86,18 +88,18 @@ fn generate_alert_embed(body: &PublishAlert) -> Embed {
 
             let mut embed = embed
                 .author(EmbedAuthorBuilder::new(username).icon_url(icon_url).build())
-                .field(EmbedFieldBuilder::new("UUID", *uuid).inline())
-                .field(EmbedFieldBuilder::new("Dimension", dimension).inline())
+                .field(EmbedFieldBuilder::new("UUID", format!("`{uuid}`")).inline())
+                .field(EmbedFieldBuilder::new("Dimension", format!("`{dimension}`")).inline())
                 .field(
                     EmbedFieldBuilder::new(
                         "Position",
-                        format!("{}, {}, {}", position.x, position.y, position.z),
+                        format!("`{}, {}, {}`", position.x, position.y, position.z),
                     )
                     .inline(),
                 );
 
             if let Some(game_mode) = game_mode {
-                let field = EmbedFieldBuilder::new("Game Mode", game_mode.to_string()).inline();
+                let field = EmbedFieldBuilder::new("Game Mode", format!("`{game_mode}`")).inline();
                 embed = embed.field(field);
             }
 

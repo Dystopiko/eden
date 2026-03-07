@@ -31,7 +31,8 @@ impl Timestamp {
     #[must_use]
     pub fn into_twilight(self) -> twilight_model::util::Timestamp {
         use twilight_model::util::Timestamp;
-        Timestamp::from_str(&self.to_string()).expect("RFC 3339 is compilant with ISO 8601 format")
+        Timestamp::from_str(&self.0.to_rfc3339_opts(chrono::SecondsFormat::Millis, false))
+            .expect("should be compilant with Twilight's timestamp format")
     }
 
     /// Parses a timestamp from an RFC 3339 date and time string.

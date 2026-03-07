@@ -1,0 +1,23 @@
+[package]
+name = "eden"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-common = { path = "../eden-common" }
+eden-config = { path = "../eden-config" }
+eden-gateway-server = { path = "../eden-gateway-server" }
+eden-kernel = { path = "../eden-kernel" }
+erased-report = { path = "../erased-report" }
+
+error-stack = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing = { workspace = true }
+
+[lints]
+workspace = true
