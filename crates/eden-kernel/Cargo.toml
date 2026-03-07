@@ -14,6 +14,7 @@ eden-sqlite = { path = "../eden-sqlite" }
 
 bon = { workspace = true }
 error-stack = { workspace = true }
+twilight-cache-inmemory = { workspace = true }
 twilight-http = { workspace = true }
 
 [lints]

@@ -22,6 +22,7 @@ fn main() -> Result<(), ErasedReport> {
 
     let kernel = rt.block_on(async {
         let built = Kernel::builder()
+            .discord_cache(eden_discord_bot::default_in_memory_cache())
             .discord_from_config(&config.bot)
             .pools(&config.database)?
             .config(Arc::new(config))
@@ -31,7 +32,10 @@ fn main() -> Result<(), ErasedReport> {
         Ok::<_, ErasedReport>(built)
     })?;
 
-    rt.block_on(async {
+    let result: Result<(), ErasedReport> = rt.block_on(async {
+        tokio::spawn(eden::bootstrap::check_database(kernel.clone()));
+
+        let bot = eden_discord_bot::service(kernel.clone());
         let gateway = eden_gateway_server::service(kernel.clone());
 
         let shutdown_signal = kernel.shutdown_signal.clone();
@@ -41,11 +45,15 @@ fn main() -> Result<(), ErasedReport> {
             shutdown_signal.initiate();
         });
 
-        gateway.await
-    })?;
+        let (bot, gateway) = tokio::join!(bot, gateway);
+        bot?;
+        gateway?;
+
+        Ok(())
+    });
 
     tracing::info!("closing down Eden");
-    Ok(())
+    result
 }
 
 #[tracing::instrument(name = "config.load", level = "debug")]

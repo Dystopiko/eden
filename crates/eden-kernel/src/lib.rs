@@ -5,12 +5,16 @@ use eden_database::DatabasePools;
 use eden_sqlite::{Pool, error::PoolBuildError};
 use error_stack::{Report, ResultExt};
 use std::sync::Arc;
+use twilight_cache_inmemory::InMemoryCache;
 
 #[derive(Debug, Builder)]
 #[builder(finish_fn(name = "build_inner", vis = ""))]
 pub struct Kernel {
     /// App configuration
     pub config: Arc<Config>,
+
+    /// Discord in-memory model cache
+    pub discord_cache: InMemoryCache,
 
     /// Discord Rest API client
     pub discord: Arc<twilight_http::Client>,
