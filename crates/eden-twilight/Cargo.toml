@@ -14,7 +14,7 @@ thiserror = { workspace = true }
 twilight-cache-inmemory = { workspace = true }
 twilight-http = { workspace = true }
 twilight-model = { workspace = true }
-twilight-util = { workspace = true, features = ["permission-calculator"] }
+twilight-util = { workspace = true }
 
 [lints]
 workspace = true

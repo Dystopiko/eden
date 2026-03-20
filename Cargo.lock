@@ -838,16 +838,20 @@ dependencies = [
  "eden-database",
  "eden-gateway-api",
  "eden-sqlite",
+ "eden-text-handling",
  "eden-twilight",
  "eden-utils",
  "erased-report",
  "error-stack",
+ "percent-encoding",
+ "pretty_assertions",
  "serde",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
  "twilight-http",
  "twilight-model",
+ "twilight-util",
  "uuid",
 ]
 
@@ -907,7 +911,6 @@ dependencies = [
  "error-stack",
  "insta",
  "mime",
- "percent-encoding",
  "pretty_assertions",
  "serde",
  "serde_json",
@@ -3426,6 +3429,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e71de79d48ce27aba1f591b10c84677f1317489c2ea154d9b8ed01efa8bceb53"
 dependencies = [
  "twilight-model",
+ "twilight-validate",
 ]
 
 [[package]]
