@@ -60,12 +60,15 @@ fn generate_alert_embed(event: &NewLoggedInEvent) -> Embed {
         .icon_url(icon_url)
         .build();
 
+    let event_id = EmbedFieldBuilder::new("Event ID", format!("`{}`", event.event_id)).inline();
     let ip_addr = EmbedFieldBuilder::new("IP Address", format!("`{}`", event.ip_address)).inline();
     let account_type = EmbedFieldBuilder::new("Account Type", format!("`{}`", event.kind)).inline();
 
     EmbedBuilder::new()
         .author(author_field)
+        .field(event_id)
         .field(ip_addr)
         .field(account_type)
+        .timestamp(event.created_at.into_twilight())
         .build()
 }
