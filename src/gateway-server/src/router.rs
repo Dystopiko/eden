@@ -11,6 +11,10 @@ pub fn build(kernel: Arc<Kernel>, ratelimiter: Arc<RateLimiter>) -> Router<()> {
     let router = Router::new()
         .route("/", get(index))
         .route(
+            "/admin/settings",
+            get(admin::settings::get).patch(admin::settings::patch),
+        )
+        .route(
             "/alerts/admin_commands",
             put(alerts::admin_commands::publish),
         )

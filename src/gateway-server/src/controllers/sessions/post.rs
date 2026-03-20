@@ -68,13 +68,13 @@ async fn grant_session(
 
     logs.add("account.exists", account.is_some());
     let Some(account) = account else {
-        if !kernel.config.minecraft.allow_guests {
+        let settings = kernel.settings().await?;
+        if !settings.allow_guests {
             return Err(ApiError::from_static(
                 ErrorCode::Forbidden,
                 "Guest access is disabled by an administrator",
             ));
         }
-
         return Ok(Session::guest(body.ip, account_type, body.uuid));
     };
 

@@ -862,6 +862,7 @@ dependencies = [
  "bon",
  "chrono",
  "claims",
+ "eden-config",
  "eden-sqlite",
  "eden-timestamp",
  "eden-utils",

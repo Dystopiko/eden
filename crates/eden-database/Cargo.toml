@@ -8,6 +8,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+eden-config = { workspace = true }
 eden-sqlite = { workspace = true }
 eden-timestamp = { workspace = true, features = ["full"] }
 

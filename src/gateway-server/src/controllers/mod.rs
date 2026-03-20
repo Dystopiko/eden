@@ -1,6 +1,7 @@
 use axum::extract::Json;
 use serde_json::{Value, json};
 
+pub mod admin;
 pub mod alerts;
 pub mod sessions;
 

@@ -44,9 +44,8 @@ impl McAccountView {
 
 #[cfg(test)]
 mod tests {
-    use std::net::{IpAddr, Ipv4Addr};
-
     use eden_timestamp::Timestamp;
+    use std::net::{IpAddr, Ipv4Addr};
     use twilight_model::id::Id;
     use uuid::Uuid;
 

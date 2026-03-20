@@ -1,7 +1,7 @@
 use bon::Builder;
 use eden_background_worker::{BackgroundJob, background_job::EnqueueJobError};
 use eden_config::{Config, sections::minecraft::UuidOrUsername};
-use eden_database::{DatabasePools, views::McAccountView};
+use eden_database::{DatabasePools, Settings, settings::SettingsQueryError, views::McAccountView};
 use eden_sqlite::{Pool, error::PoolBuildError};
 use eden_utils::signals::ShutdownSignal;
 use error_stack::{Report, ResultExt};
@@ -63,6 +63,28 @@ impl Kernel {
             .change_context(EnqueueJobError::Database)?;
 
         Ok(id)
+    }
+
+    pub async fn settings(&self) -> Result<Settings, Report<SettingsQueryError>> {
+        let mut conn = self
+            .pools
+            .db_write()
+            .await
+            .change_context(SettingsQueryError)?;
+
+        let settings = Settings::find_or_insert(
+            &mut conn,
+            self.config.bot.primary_guild.id,
+            &self.config.setup.settings,
+        )
+        .await?;
+
+        conn.commit()
+            .await
+            .change_context(SettingsQueryError)
+            .attach("while trying to commit transaction")?;
+
+        Ok(settings)
     }
 }
 

@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use toml_edit::Document;
 
 use crate::{
-    sections::{Bot, Database, Minecraft},
+    sections::{Bot, Database, Minecraft, setup::Setup},
     validate::{Validate, ValidationContext},
 };
 
@@ -18,6 +18,8 @@ pub struct Config {
     pub database: Database,
     #[serde(default)]
     pub minecraft: Minecraft,
+    #[serde(default)]
+    pub setup: Setup,
 }
 
 impl Config {
