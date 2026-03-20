@@ -7,7 +7,7 @@ version = "2.0.0-alpha.0"
 authors = ["memothelemo <dev@memothelemo.xyz>"]
 edition = "2024"
 license = "AGPL-2.0"
-repository = "https://github.com/memothelemo/eden"
+repository = "https://github.com/Dystopiko/eden"
 
 [workspace.dependencies]
 # Eden crates
