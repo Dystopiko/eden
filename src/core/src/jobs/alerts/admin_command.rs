@@ -5,6 +5,7 @@ use eden_gateway_api::alerts::admin_commands::{
 };
 use eden_text_handling::markdown::strip_markdown;
 use eden_twilight::http::ResponseFutureExt;
+use eden_utils::minecraft::{HeadIconSource, get_head_icon_url};
 use erased_report::ErasedReport;
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, sync::Arc, time::Duration};
@@ -64,11 +65,9 @@ impl BackgroundJob for AdminCommandAlertJob {
 }
 
 fn embed_for_player_executor(embed: EmbedBuilder, player: &ExecutorPlayerInfo) -> EmbedBuilder {
-    let icon_url = ImageSource::url(get_head_icon_url(&player.username))
-        .expect("get_head_icon_url should produce valid URL");
-
+    let icon_url = get_head_icon_url(HeadIconSource::Username(&player.username));
     let author_field = EmbedAuthorBuilder::new(&player.username)
-        .icon_url(icon_url)
+        .icon_url(ImageSource::url(icon_url).expect("get_head_icon_url should produce valid URL"))
         .build();
 
     let uuid_field = EmbedFieldBuilder::new("UUID", format!("`{}`", player.uuid)).inline();
@@ -91,36 +90,4 @@ fn embed_for_player_executor(embed: EmbedBuilder, player: &ExecutorPlayerInfo) -
         .field(dim_field)
         .field(position_field)
         .field(gamemode_field)
-}
-
-fn get_head_icon_url(username: &str) -> String {
-    const HEAD_ICON_BASE_URL: &str = "https://minotar.net/avatar/";
-
-    let mut url = HEAD_ICON_BASE_URL.to_string();
-    url.extend(percent_encoding::percent_encode(
-        username.as_bytes(),
-        percent_encoding::NON_ALPHANUMERIC,
-    ));
-    url
-}
-
-#[cfg(test)]
-mod tests {
-    use super::get_head_icon_url;
-    use pretty_assertions::assert_eq;
-
-    #[test]
-    fn test_get_head_icon_url() {
-        assert_eq!(
-            get_head_icon_url("Notch"),
-            "https://minotar.net/avatar/Notch"
-        );
-
-        // Bedrock supports usernames with spaces, so the username
-        // must be percent-encoded to produce a valid URL.
-        assert_eq!(
-            get_head_icon_url("Ordinary Player"),
-            "https://minotar.net/avatar/Ordinary%20Player"
-        );
-    }
 }

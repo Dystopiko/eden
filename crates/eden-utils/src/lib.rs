@@ -5,6 +5,8 @@ pub mod bootstrap;
 #[cfg(feature = "full")]
 pub mod futures;
 #[cfg(feature = "full")]
+pub mod minecraft;
+#[cfg(feature = "full")]
 pub mod path;
 #[cfg(feature = "full")]
 pub mod sensitive;

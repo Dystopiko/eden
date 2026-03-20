@@ -20,7 +20,6 @@ bon = { workspace = true }
 dashmap = { version = "6.1.0", features = ["serde"] }
 erased-report = { workspace = true }
 error-stack = { workspace = true }
-percent-encoding = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
@@ -29,9 +28,6 @@ twilight-model = { workspace = true }
 twilight-util = { workspace = true }
 tracing = { workspace = true }
 uuid = { workspace = true }
-
-[dev-dependencies]
-pretty_assertions = { workspace = true }
 
 [lints]
 workspace = true

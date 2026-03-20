@@ -843,8 +843,6 @@ dependencies = [
  "eden-utils",
  "erased-report",
  "error-stack",
- "percent-encoding",
- "pretty_assertions",
  "serde",
  "thiserror 2.0.18",
  "tokio",
@@ -998,13 +996,16 @@ dependencies = [
  "error-stack",
  "futures",
  "libc",
+ "percent-encoding",
  "pin-project-lite",
+ "pretty_assertions",
  "rustls",
  "serde",
  "tempfile",
  "thiserror 2.0.18",
  "tokio",
  "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
