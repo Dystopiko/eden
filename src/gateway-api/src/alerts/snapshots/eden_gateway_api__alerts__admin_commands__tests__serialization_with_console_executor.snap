@@ -1,0 +1,10 @@
+---
+source: src/gateway-api/src/alerts/admin_commands.rs
+expression: alert
+---
+{
+  "command": "/tell Notch I have secrets",
+  "executor": {
+    "type": "console"
+  }
+}

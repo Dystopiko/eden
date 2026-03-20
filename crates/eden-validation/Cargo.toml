@@ -1,0 +1,16 @@
+[package]
+name = "eden-validation"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-text-handling = { workspace = true }
+error-stack = { workspace = true }
+thiserror = { workspace = true }
+validator = { workspace = true }
+
+[lints]
+workspace = true

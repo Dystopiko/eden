@@ -1,5 +1,6 @@
 [package]
 name = "eden-twilight"
+description = "Helper crate for handling twilight ecosystem a bit easier for Eden project"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

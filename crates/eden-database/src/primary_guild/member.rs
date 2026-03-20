@@ -3,8 +3,10 @@ use error_stack::{Report, ResultExt};
 use sqlx::FromRow;
 use std::str::FromStr;
 use thiserror::Error;
-use twilight_model::guild::Member as GuildMember;
-use twilight_model::id::{Id, marker::UserMarker};
+use twilight_model::{
+    guild::Member as GuildMember,
+    id::{Id, marker::UserMarker},
+};
 
 use crate::{Snowflake, Timestamp};
 
@@ -97,7 +99,6 @@ mod tests {
     use super::UpsertMember;
     use crate::Timestamp as DbTimestamp;
 
-    use eden_sqlite::Pool;
     use std::str::FromStr;
     use twilight_model::guild::{Member, MemberFlags};
     use twilight_model::id::Id;
@@ -106,13 +107,11 @@ mod tests {
 
     #[tokio::test]
     async fn upsert_should_update_if_exists() {
-        eden_common::testing::init();
-
-        let joined_at = DbTimestamp::from_str("2024-01-01T00:00:00Z").unwrap();
-        let pool = Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
+        let pool = crate::testing::setup().await;
 
         let mut conn = pool.begin().await.unwrap();
+        let joined_at = DbTimestamp::from_str("2024-01-01T00:00:00Z").unwrap();
+
         let initial = UpsertMember::builder()
             .discord_user_id(Id::new(123455))
             .joined_at(joined_at)
@@ -138,12 +137,8 @@ mod tests {
 
     #[tokio::test]
     async fn upsert_should_insert_if_not_exists() {
-        eden_common::testing::init();
-
+        let pool = crate::testing::setup().await;
         let joined_at = DbTimestamp::from_str("2024-01-01T00:00:00Z").unwrap();
-
-        let pool = Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
 
         let mut conn = pool.begin().await.unwrap();
         let member = UpsertMember::builder()

@@ -41,14 +41,10 @@ impl Chaos {
 #[cfg(test)]
 mod tests {
     use crate::primary_guild::Chaos;
-    use eden_sqlite::Pool;
 
     #[tokio::test]
     async fn test_overflow() {
-        eden_common::testing::init();
-
-        let pool = Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
+        let pool = crate::testing::setup().await;
 
         let mut conn = pool.begin().await.unwrap();
         Chaos::add_crying_times(&mut conn).await.unwrap();
@@ -69,10 +65,7 @@ mod tests {
 
     #[tokio::test]
     async fn should_increment_first_crying_times() {
-        eden_common::testing::init();
-
-        let pool = Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
+        let pool = crate::testing::setup().await;
 
         let mut conn = pool.begin().await.unwrap();
         let info = Chaos::add_crying_times(&mut conn).await.unwrap();
@@ -83,15 +76,12 @@ mod tests {
 
     #[tokio::test]
     async fn should_increment_existing_crying_times() {
-        eden_common::testing::init();
-
-        let pool = Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
+        let pool = crate::testing::setup().await;
 
         let mut conn = pool.begin().await.unwrap();
-
         let initial = Chaos::add_crying_times(&mut conn).await.unwrap();
         let info = Chaos::add_crying_times(&mut conn).await.unwrap();
+
         assert_eq!(info.id, 1);
         assert_eq!(info.crying_emoticon_times, 2);
         assert_eq!(info.created_at, initial.created_at);

@@ -1,11 +1,11 @@
 use error_stack::{Report, ResultExt};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use std::fmt;
-use std::str::FromStr;
-use std::time::Duration;
+use std::{fmt, str::FromStr, time::Duration};
 
-use crate::config::PoolConfig;
-use crate::error::{PoolBuildError, PoolError, SqlErrorType};
+use crate::{
+    config::PoolConfig,
+    error::{PoolBuildError, PoolError, SqlErrorType},
+};
 
 pub use sqlx::SqliteConnection as Connection;
 
@@ -31,6 +31,7 @@ impl Pool {
     pub fn new(config: PoolConfig) -> Result<Self, Report<PoolBuildError>> {
         let url = SqliteConnectOptions::from_str(&config.url)
             .change_context(PoolBuildError::InvalidConnectionURL)?
+            .create_if_missing(true)
             .read_only(config.readonly);
 
         let inner = SqlitePoolOptions::new()

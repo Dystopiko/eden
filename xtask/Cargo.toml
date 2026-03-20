@@ -1,0 +1,22 @@
+[package]
+name = "xtask"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-utils = { workspace = true }
+erased-report = { workspace = true }
+error-stack = { workspace = true }
+thiserror = { workspace = true }
+
+env_logger = "0.11.9"
+log = "0.4.29"
+which = "8.0.1"
+xflags = "0.3.2"
+xshell = "0.2.7"
+
+[lints]
+workspace = true

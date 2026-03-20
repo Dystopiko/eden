@@ -1,6 +1,5 @@
 [package]
 name = "erased-report"
-description = "Type erased Report support for error-stack"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

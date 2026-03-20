@@ -1,6 +1,5 @@
 use rustrict::Censor;
-use std::borrow::Cow;
-use std::str::Chars;
+use std::{borrow::Cow, str::Chars};
 
 use crate::is_maybe_word;
 

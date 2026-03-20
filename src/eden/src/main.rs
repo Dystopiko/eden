@@ -1,0 +1,93 @@
+use eden_background_worker::Runner;
+use eden_config::{Config, EditableConfig, error::ConfigLoadError};
+use eden_core::{
+    jobs::{JobContext, RunnerExt},
+    kernel::Kernel,
+};
+use eden_utils::signals::ShutdownSignal;
+use erased_report::ErasedReport;
+use error_stack::{Report, ResultExt};
+use std::{path::Path, sync::Arc};
+
+fn main() -> Result<(), ErasedReport> {
+    let dotenv = eden_utils::env::load().ok().flatten();
+    eden_utils::bootstrap::init_rustls()?;
+    eden::bootstrap::init_tracing();
+
+    if let Some(dotenv) = dotenv {
+        tracing::debug!("using dotenv file: {}", dotenv.display());
+    }
+
+    let config = load_config()?;
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    let kernel = rt.block_on(async {
+        let built = Kernel::builder()
+            .pools_from_config(&config.database)?
+            .config(Arc::new(config))
+            .shutdown_signal(ShutdownSignal::new())
+            .build();
+
+        Ok::<_, ErasedReport>(built)
+    })?;
+
+    let result: Result<(), ErasedReport> = rt.block_on(async {
+        let token = kernel.config.bot.token.as_str().to_string();
+        let http = Arc::new(twilight_http::Client::builder().token(token).build());
+
+        let job_context = JobContext::builder()
+            .discord(http)
+            .kernel(kernel.clone())
+            .build();
+
+        eden_database::testing::perform_migrations(kernel.pools.primary_db()).await;
+
+        let workers_handle = Runner::new(job_context, kernel.pools.clone())
+            .register_core_job_types()
+            .workers(1)
+            .start();
+
+        let gateway = eden_gateway_server::service(kernel.clone());
+
+        let shutdown_signal = kernel.shutdown_signal.clone();
+        tokio::spawn(async move {
+            let signal = eden::bootstrap::shutdown_signal().await;
+            tracing::warn!("received {signal}; initiating graceful shutdown");
+            shutdown_signal.initiate();
+        });
+
+        gateway.await?;
+        workers_handle.shutdown().await;
+        Ok(())
+    });
+
+    tracing::info!("closing down Eden");
+    result
+}
+
+#[tracing::instrument(name = "config.load", level = "debug")]
+fn load_config() -> Result<Config, Report<ConfigLoadError>> {
+    let Some(path) = Config::find() else {
+        // Save the template config file into the current directory
+        EditableConfig::save_template(Config::FILE_NAME)
+            .change_context(ConfigLoadError)
+            .attach("while trying to save template config file")?;
+
+        let template_path = Path::new(Config::FILE_NAME);
+        tracing::warn!(
+            "No config file found! Wrote template config file at: {}",
+            template_path.display()
+        );
+        tracing::warn!("Please edit eden.toml to configure Eden then re-run");
+
+        std::process::exit(1);
+    };
+
+    let config = EditableConfig::open(path)?;
+    tracing::debug!(config = ?&*config, "using config file: {}", config.path().display());
+
+    Ok(config.into_inner())
+}

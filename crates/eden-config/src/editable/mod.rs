@@ -1,15 +1,13 @@
 use error_stack::{Report, ResultExt};
 use std::path::{Path, PathBuf};
-use toml_edit::DocumentMut;
+use toml_edit::{Document, DocumentMut};
 
-use std::fmt;
-use std::ops;
+use crate::{
+    Config,
+    error::{ConfigLoadError, EditConfigError, SaveConfigError},
+};
 
-use crate::error::*;
-use crate::root::Config;
-
-/// A handle to an Eden configuration file that supports both
-/// reading and writing.
+/// A handle to a configuration file that supports both reading and writing.
 pub struct EditableConfig {
     /// Path to the config file, regardless if it exists or not.
     path: PathBuf,
@@ -22,28 +20,25 @@ pub struct EditableConfig {
 }
 
 impl EditableConfig {
-    /// Creates an `EditableConfig` bound to `path` and pre-populated with the
-    /// compiled-in default configuration.
-    #[must_use]
-    pub fn new<P: AsRef<Path>>(path: P) -> Self {
-        let path = path.as_ref().to_path_buf();
-        let (parsed, document) = Config::defaults();
+    #[track_caller]
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, Report<ConfigLoadError>> {
+        let path = path.as_ref();
+        let (parsed, document) = read_from_file(path)?;
+        Ok(Self {
+            path: path.to_path_buf(),
+            parsed,
+            document: document.into_mut(),
+        })
+    }
 
-        Self {
-            path,
-            parsed: parsed.clone(),
-            document: document.clone().into_mut(),
-        }
+    #[track_caller]
+    pub fn save_template<P: AsRef<Path>>(path: P) -> Result<(), Report<SaveConfigError>> {
+        eden_utils::path::write_atomic(path.as_ref(), Config::template())
+            .change_context(SaveConfigError)
     }
 }
 
 impl EditableConfig {
-    /// Applies a modification to the in-memory configuration, then it tries to
-    /// save these changes to the disk, and attempt to parse the configuration
-    /// again if needed.
-    ///
-    /// This function allows you to safely modify the underlying TOML
-    /// document using a closure.
     #[track_caller]
     pub fn edit(
         &mut self,
@@ -54,10 +49,9 @@ impl EditableConfig {
 
         // Then, we can save changes to the specified path
         let document = document.to_string();
-        eden_common::path::write_atomic(&self.path, &document).change_context(EditConfigError)?;
+        eden_utils::path::write_atomic(&self.path, &document).change_context(EditConfigError)?;
 
-        let (parsed, document) =
-            Config::load(&document, &self.path).change_context(EditConfigError)?;
+        let (parsed, document) = read_from_file(&self.path).change_context(EditConfigError)?;
 
         // Safely mutate the necessary fields
         self.parsed = parsed;
@@ -66,26 +60,9 @@ impl EditableConfig {
         Ok(())
     }
 
-    /// Opens an existing config file at `path`: parses it, validates it, and
-    /// returns a ready-to-use `EditableConfig` on success.
-    #[track_caller]
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, Report<ConfigLoadError>> {
-        let mut this = Self::new(path);
-        this.reload()?;
-        Ok(this)
-    }
-
-    /// Reads the file at [`EditableConfig::path`] from disk, parses and
-    /// validates it, and — on success — replaces the current in-memory state.
-    ///
-    /// The previous in-memory state is left untouched if any step fails, so a
-    /// failed `reload` never leaves the `EditableConfig` in an inconsistent
-    /// state.
     #[track_caller]
     pub fn reload(&mut self) -> Result<(), Report<ConfigLoadError>> {
-        let source = eden_common::path::read(&self.path).change_context(ConfigLoadError)?;
-        let (parsed, document) =
-            Config::load(&source, &self.path).change_context(ConfigLoadError)?;
+        let (parsed, document) = read_from_file(&self.path).change_context(ConfigLoadError)?;
 
         // Only mutate state after every fallible step has succeeded.
         self.parsed = parsed;
@@ -94,10 +71,9 @@ impl EditableConfig {
         Ok(())
     }
 
-    /// Writes the current in-memory configuration to disk.
     #[track_caller]
     pub fn save(&self) -> Result<(), Report<SaveConfigError>> {
-        eden_common::path::write_atomic(&self.path, self.document.to_string())
+        eden_utils::path::write_atomic(&self.path, self.document.to_string())
             .change_context(SaveConfigError)
     }
 }
@@ -109,12 +85,6 @@ impl EditableConfig {
     #[must_use]
     pub fn document(&self) -> &DocumentMut {
         &self.document
-    }
-
-    /// Returns `true` if the config file already exists on disk.
-    #[must_use]
-    pub fn exists(&self) -> bool {
-        self.path.exists()
     }
 
     /// Consumes the entire [`EditableConfig`] object and
@@ -131,7 +101,7 @@ impl EditableConfig {
     }
 }
 
-impl ops::Deref for EditableConfig {
+impl std::ops::Deref for EditableConfig {
     type Target = Config;
 
     fn deref(&self) -> &Self::Target {
@@ -139,11 +109,16 @@ impl ops::Deref for EditableConfig {
     }
 }
 
-impl fmt::Debug for EditableConfig {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for EditableConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("EditableConfig")
             .field("path", &self.path)
             .field("parsed", &self.parsed)
             .finish_non_exhaustive()
     }
+}
+
+fn read_from_file(path: &Path) -> Result<(Config, Document<String>), Report<ConfigLoadError>> {
+    let source = eden_utils::path::read(path).change_context(ConfigLoadError)?;
+    Config::maybe_toml_file(&source, path).change_context(ConfigLoadError)
 }

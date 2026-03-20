@@ -1,7 +1,4 @@
-use comrak::arena_tree::NodeEdge;
-use comrak::nodes::NodeValue;
-use comrak::options::Extension;
-use comrak::{Arena, Options};
+use comrak::{Arena, Options, arena_tree::NodeEdge, nodes::NodeValue, options::Extension};
 use std::sync::LazyLock;
 
 // This configuration follows Discord's version of Markdown.

@@ -1,19 +1,34 @@
 [workspace]
-members = ["crates/*"]
-exclude = ["patches/*"]
+members = ["crates/*", "src/*", "xtask"]
 resolver = "3"
 
 [workspace.package]
-version = "0.2.0-alpha.0"
+version = "2.0.0-alpha.0"
 authors = ["memothelemo <dev@memothelemo.xyz>"]
 edition = "2024"
 license = "AGPL-2.0"
 repository = "https://github.com/memothelemo/eden"
 
 [workspace.dependencies]
+# Eden crates
+eden-background-worker = { path = "crates/eden-background-worker" }
+eden-config = { path = "crates/eden-config" }
+eden-database = { path = "crates/eden-database" }
+eden-sqlite = { path = "crates/eden-sqlite" }
+eden-text-handling = { path = "crates/eden-text-handling" }
+eden-timestamp = { path = "crates/eden-timestamp" }
+eden-toml = { path = "crates/eden-toml" }
+eden-twilight = { path = "crates/eden-twilight" }
+eden-utils = { path = "crates/eden-utils" }
+eden-validation = { path = "crates/eden-validation" }
+
 # Data types
 chrono = { version = "0.4.44", features = ["serde"] }
+dashmap = { version = "6.1.0", features = ["serde"] }
 uuid = { version = "1.21.0", features = ["v4", "serde"] }
+
+# CLI
+clap = { version = "4.5.13", features = ["derive", "env"] }
 
 # Error handling
 erased-report = { path = "crates/erased-report" }
@@ -23,7 +38,7 @@ thiserror = "2.0.18"
 # Testing
 criterion = { default-features = false, version = "0.5" }
 claims = "0.8.0"
-insta = "1.46.3"
+insta = { version = "1.46.3", features = ["json", "serde"] }
 pretty_assertions = "1.4.1"
 tempfile = "3.25.0"
 
@@ -55,6 +70,7 @@ tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 # Useful helpers
 bon = "3.9.0"
 unindent = "0.2.4"
+validator = { version = "0.20.0", features = ["derive"] }
 
 # Core dependencies
 [workspace.dependencies.sqlx]
@@ -73,8 +89,12 @@ version = "0.23.26"
 default-features = false
 features = [
     "logging",
+    "ring",
     "tls12",
 ]
 
 [workspace.lints.clippy]
 derivable_impls = "allow"
+
+[workspace.lints.rust]
+unsafe_code = "deny"

@@ -117,7 +117,7 @@ impl std::fmt::Display for McAccountType {
 #[cfg(test)]
 mod tests {
     use claims::assert_err;
-    use eden_common::testing::expect_error_containing;
+    use eden_utils::testing::expect_error_containing;
     use twilight_model::id::Id;
     use twilight_model::id::marker::UserMarker;
     use uuid::Uuid;
@@ -141,10 +141,7 @@ mod tests {
 
     #[tokio::test]
     async fn should_not_hold_account_by_same_user_id_and_uuid() {
-        eden_common::testing::init();
-
-        let pool = eden_sqlite::Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
+        let pool = crate::testing::setup().await;
 
         let id = Id::new(1234);
         let uuid = Uuid::new_v4();
@@ -196,10 +193,7 @@ mod tests {
 
     #[tokio::test]
     async fn should_insert_account() {
-        eden_common::testing::init();
-
-        let pool = eden_sqlite::Pool::memory(None).await;
-        crate::migrations::perform(&pool).await.unwrap();
+        let pool = crate::testing::setup().await;
 
         let id = Id::new(1234);
         let uuid = Uuid::new_v4();

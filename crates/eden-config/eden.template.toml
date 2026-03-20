@@ -1,0 +1,5 @@
+[bot]
+token = "<INSERT TOKEN HERE>"
+
+[bot.primary_guild]
+id = "<INSERT PRIMARY GUILD ID HERE>"

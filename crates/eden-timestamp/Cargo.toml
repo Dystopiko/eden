@@ -1,0 +1,27 @@
+[package]
+name = "eden-timestamp"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+full = ["sqlx", "twilight-model"]
+
+[dependencies]
+chrono = { workspace = true }
+error-stack = { workspace = true }
+serde = { workspace = true }
+sqlx = { workspace = true, optional = true }
+thiserror = { workspace = true }
+twilight-model = { workspace = true, optional = true }
+
+[dev-dependencies]
+claims = { workspace = true }
+eden-sqlite = { workspace = true }
+eden-utils = { workspace = true }
+tokio = { workspace = true }
+
+[lints]
+workspace = true

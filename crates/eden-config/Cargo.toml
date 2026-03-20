@@ -1,5 +1,6 @@
 [package]
 name = "eden-config"
+description = "Configuration for the Eden project"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -7,11 +8,10 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-eden-common = { path = "../eden-common" }
-eden-toml = { path = "../eden-toml" }
+eden-utils = { workspace = true, features = ["full"] }
+eden-toml = { workspace = true }
 
 constant_time_eq = "0.4.2"
-
 error-stack = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }

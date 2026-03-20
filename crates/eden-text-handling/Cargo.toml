@@ -1,5 +1,6 @@
 [package]
 name = "eden-text-handling"
+description = "Text handling crate for the Eden project"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

@@ -1,6 +1,8 @@
-use codespan_reporting::diagnostic::{Diagnostic, Label};
-use codespan_reporting::files::SimpleFile;
-use codespan_reporting::term::Config;
+use codespan_reporting::{
+    diagnostic::{Diagnostic, Label},
+    files::SimpleFile,
+    term::Config,
+};
 use error_stack::Report;
 use serde::de::DeserializeOwned;
 use toml_edit::Document;
@@ -9,7 +11,7 @@ use std::fmt;
 use std::ops::Range;
 use std::path::Path;
 
-pub mod error;
+mod error;
 pub use self::error::TomlDiagnostic;
 
 /// Parses a raw string with possibly valid TOML document into a

@@ -1,8 +1,6 @@
+use std::{fmt, ops};
 use thiserror::Error;
 use twilight_model::id::Id;
-
-use std::fmt;
-use std::ops;
 
 /// Database compatible type for any IDs in [`twilight_model`].
 ///
@@ -139,7 +137,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_encode() {
-        eden_common::testing::init();
+        eden_utils::testing::init();
 
         let pool = Pool::memory(None).await;
         let result = sqlx::query("SELECT ?")
@@ -153,7 +151,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_encode_error() {
-        eden_common::testing::init();
+        eden_utils::testing::init();
 
         // numbers beyond positive i64 limit are invalid
         let pool = Pool::memory(None).await;
@@ -168,7 +166,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_decoding_negative_numbers() {
-        eden_common::testing::init();
+        eden_utils::testing::init();
 
         // numbers beyond positive i64 limit are invalid
         let pool = Pool::memory(None).await;
@@ -183,7 +181,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_decoding_zero() {
-        eden_common::testing::init();
+        eden_utils::testing::init();
 
         // numbers beyond positive i64 limit are invalid
         let pool = Pool::memory(None).await;
@@ -198,7 +196,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_decoding() {
-        eden_common::testing::init();
+        eden_utils::testing::init();
 
         // numbers beyond positive i64 limit are invalid
         let pool = Pool::memory(None).await;

@@ -1,0 +1,32 @@
+[package]
+name = "eden-background-worker"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-database = { workspace = true }
+eden-sqlite = { workspace = true }
+eden-utils = { workspace = true, features = ["full"] }
+
+async-channel = "2.5.0"
+async-trait = "0.1.89"
+bon = { workspace = true }
+erased-report = { workspace = true }
+error-stack = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+claims = { workspace = true }
+insta = { workspace = true }
+
+[lints]
+workspace = true

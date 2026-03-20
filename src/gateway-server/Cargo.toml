@@ -1,0 +1,57 @@
+[package]
+name = "eden-gateway-server"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-core = { path = "../core" }
+eden-database = { workspace = true }
+eden-gateway-api = { path = "../gateway-api", features = ["server"] }
+eden-sqlite = { workspace = true }
+eden-text-handling = { workspace = true }
+eden-twilight = { workspace = true }
+eden-utils = { workspace = true }
+
+axum-extra = { version = "0.12.5", features = ["typed-header"] }
+chrono = { workspace = true }
+dashmap = { workspace = true }
+erased-report = { workspace = true }
+error-stack = { workspace = true }
+mime = "0.3.17"
+percent-encoding = "2.3.2"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tower = "0.5.3"
+tower-layer = "0.3.3"
+tower-service = "0.3.3"
+twilight-model = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+validator = { workspace = true }
+
+[dependencies.axum]
+version = "0.8.8"
+default-features = false
+features = [
+    "http1",
+    "json",
+    "macros",
+    "matched-path",
+    "query",
+    "tokio",
+    "tower-log",
+    "tracing"
+]
+
+[dev-dependencies]
+claims = { workspace = true }
+insta = { workspace = true }
+pretty_assertions = { workspace = true }
+
+[lints]
+workspace = true

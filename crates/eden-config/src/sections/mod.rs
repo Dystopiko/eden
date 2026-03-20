@@ -8,7 +8,7 @@
 // 4. Add a `self.<name>.validate(ctx)?;` call in [`Config::validate`] below.
 
 pub mod bot;
-pub use self::bot::{Bot, Token};
-
 pub mod database;
+
+pub use self::bot::Bot;
 pub use self::database::{Database, DatabasePool, SqliteUrl};

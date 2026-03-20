@@ -1,5 +1,6 @@
 [package]
 name = "eden-sqlite"
+description = "Convenience crate for creating SQLite pools with sqlx"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

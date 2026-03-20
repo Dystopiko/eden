@@ -1,7 +1,6 @@
 use erased_report::ErasedReport;
 use error_stack::Report;
-use sqlx::error::DatabaseError;
-use sqlx::sqlite::SqliteError;
+use sqlx::{error::DatabaseError, sqlite::SqliteError};
 use thiserror::Error;
 
 /// Errors that can occur when constructing a [`Pool`].
@@ -89,21 +88,15 @@ pub trait ResultExt {
 
 impl<E> ReportExt for Report<E> {
     fn sql_error_type(&self) -> Option<SqlErrorType> {
-        if let Some(error) = self.downcast_ref::<sqlx::Error>() {
-            Some(SqlErrorType::from_sqlx_error(error))
-        } else {
-            None
-        }
+        self.downcast_ref::<sqlx::Error>()
+            .map(SqlErrorType::from_sqlx_error)
     }
 }
 
 impl ReportExt for ErasedReport {
     fn sql_error_type(&self) -> Option<SqlErrorType> {
-        if let Some(error) = self.downcast_ref::<sqlx::Error>() {
-            Some(SqlErrorType::from_sqlx_error(error))
-        } else {
-            None
-        }
+        self.downcast_ref::<sqlx::Error>()
+            .map(SqlErrorType::from_sqlx_error)
     }
 }
 

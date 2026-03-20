@@ -1,10 +1,11 @@
 use error_stack::Report;
 use serde::de::DeserializeOwned;
 use thiserror::Error;
-
-use twilight_http::Response;
-use twilight_http::api_error::ApiError;
-use twilight_http::response::{DeserializeBodyError, ResponseFuture, StatusCode};
+use twilight_http::{
+    Response,
+    api_error::ApiError,
+    response::{DeserializeBodyError, ResponseFuture, StatusCode},
+};
 
 // Retrieved from: https://discord.com/developers/docs/topics/opcodes-and-status-codes#http
 const MISSING_PERMISSIONS_CODE: u64 = 50013;

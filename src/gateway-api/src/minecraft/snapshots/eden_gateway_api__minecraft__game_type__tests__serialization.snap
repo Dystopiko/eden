@@ -1,0 +1,10 @@
+---
+source: src/gateway-api/src/minecraft/game_type.rs
+expression: possible_game_types
+---
+[
+  "survival",
+  "creative",
+  "adventure",
+  "spectator"
+]

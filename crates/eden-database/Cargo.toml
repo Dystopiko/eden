@@ -1,5 +1,6 @@
 [package]
 name = "eden-database"
+description = "Database schema definitions for Eden project"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -7,24 +8,25 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-eden-sqlite = { path = "../eden-sqlite" }
-eden-timestamps = { path = "../eden-timestamps", features = ["sqlx", "twilight"] }
+eden-sqlite = { workspace = true }
+eden-timestamp = { workspace = true, features = ["full"] }
 
 bon = { workspace = true }
+chrono = { workspace = true }
 error-stack = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 sqlx = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-tokio = { workspace = true }
 twilight-model = { workspace = true }
 uuid = { workspace = true }
 
 [dev-dependencies]
-eden-common = { path = "../eden-common" }
-
 claims = { workspace = true }
+eden-utils = { workspace = true }
 insta = { workspace = true }
+tokio = { workspace = true }
 
 [lints]
 workspace = true

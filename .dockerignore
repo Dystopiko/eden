@@ -1,0 +1,24 @@
+# Build files
+/target
+
+# IDE and user configuration
+.vscode
+.zed
+.idea
+.DS_Store
+
+# Docker itself
+.dockerignore
+Dockerfile
+
+# Git files
+.git
+.gitignore
+
+# Eden configuration
+eden.toml
+eden.*.toml
+!crates/eden-config/eden.template.toml
+
+# Environment files
+.env

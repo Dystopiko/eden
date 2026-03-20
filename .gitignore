@@ -1,10 +1,11 @@
-# Build files
+# Build output
+/stub-crates
 /target
 
-# Configuration and settings (including eden file itself)
+# Eden configuration
 eden.toml
 eden.*.toml
-!/crates/eden-config/eden.example.toml
+!crates/eden-config/eden.template.toml
 
-# Local environment files
+# Environment files
 .env

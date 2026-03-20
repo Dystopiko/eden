@@ -1,0 +1,28 @@
+[package]
+name = "eden"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+eden-background-worker = { workspace = true }
+eden-config = { workspace = true }
+eden-core = { path = "../core" }
+eden-gateway-server = { path = "../gateway-server" }
+eden-database = { workspace = true }
+eden-sqlite = { workspace = true }
+eden-utils = { workspace = true }
+
+erased-report = { workspace = true }
+error-stack = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing = { workspace = true }
+twilight-http = { workspace = true }
+
+[lints]
+workspace = true

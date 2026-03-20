@@ -1,5 +1,6 @@
 [package]
 name = "eden-toml"
+description = "TOML helper with codespan reporting support"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -8,7 +9,6 @@ repository.workspace = true
 
 [dependencies]
 codespan-reporting = { version = "0.13.1", features = ["std"] }
-
 error-stack = { workspace = true }
 serde = { workspace = true }
 toml_edit = { workspace = true }

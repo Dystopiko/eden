@@ -3,28 +3,15 @@ use eden_toml::TomlDiagnostic;
 use error_stack::Report;
 use serde::Deserialize;
 
-use twilight_model::id::Id;
-use twilight_model::id::marker::ApplicationMarker;
-
-use crate::validate::{Validate, ValidationContext};
-
 pub mod primary_guild;
 pub use self::primary_guild::PrimaryGuild;
+
+use crate::validate::{Validate, ValidationContext};
 
 /// Configuration for the Discord bot.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Bot {
-    /// The application ID of the associated Discord bot.
-    pub application_id: Id<ApplicationMarker>,
-
-    /// Primary guild/server is where all of Eden's features will take place such
-    /// as payment processes, Minecraft server integration, administration, and
-    /// many to add in the future.
-    ///
-    /// Other guilds will receive limited features offered by Eden.
     pub primary_guild: PrimaryGuild,
-
-    /// The Discord bot token used for authentication.
     pub token: Token,
 }
 
