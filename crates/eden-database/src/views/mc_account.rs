@@ -15,6 +15,7 @@ pub struct McAccountView {
     pub username: String,
     #[sqlx(rename = "type")]
     pub kind: McAccountType,
+    pub is_contributor: bool,
     pub last_login_at: Option<Timestamp>,
 }
 
@@ -50,7 +51,9 @@ mod tests {
     use uuid::Uuid;
 
     use crate::{
-        primary_guild::{LoggedInEvent, McAccount, McAccountType, Member},
+        primary_guild::{
+            LoggedInEvent, McAccount, McAccountType, Member, contributor::Contributor,
+        },
         views::McAccountView,
     };
 
@@ -71,6 +74,30 @@ mod tests {
 
         let account = query.create(conn).await.unwrap();
         (member, account)
+    }
+
+    #[tokio::test]
+    async fn should_provide_if_member_is_contributor() {
+        let pool = crate::testing::setup().await;
+
+        let mut conn = pool.begin().await.unwrap();
+        let (member, account) = setup(&mut conn).await;
+
+        Contributor::upsert()
+            .member_id(member.discord_user_id.cast())
+            .build()
+            .perform(&mut conn)
+            .await
+            .unwrap();
+
+        let view = McAccountView::find_by_mc_uuid(&mut conn, account.uuid)
+            .await
+            .unwrap();
+
+        assert_eq!(view.uuid, account.uuid);
+        assert_eq!(view.username, account.username);
+        assert_eq!(view.kind, account.kind);
+        assert!(view.is_contributor);
     }
 
     #[tokio::test]
@@ -112,6 +139,7 @@ mod tests {
         assert_eq!(view.username, account.username);
         assert_eq!(view.kind, account.kind);
         assert_eq!(view.last_login_at, Some(timestamp));
+        assert!(!view.is_contributor);
 
         assert_eq!(view.member_id, member.discord_user_id);
         assert_eq!(view.member_name, member.name);
@@ -133,6 +161,7 @@ mod tests {
         assert_eq!(view.username, account.username);
         assert_eq!(view.kind, account.kind);
         assert_eq!(view.last_login_at, None);
+        assert!(!view.is_contributor);
 
         assert_eq!(view.member_id, member.discord_user_id);
         assert_eq!(view.member_name, member.name);

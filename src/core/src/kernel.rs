@@ -1,11 +1,11 @@
 use bon::Builder;
 use eden_background_worker::{BackgroundJob, background_job::EnqueueJobError};
-use eden_config::Config;
-use eden_database::DatabasePools;
+use eden_config::{Config, sections::minecraft::UuidOrUsername};
+use eden_database::{DatabasePools, views::McAccountView};
 use eden_sqlite::{Pool, error::PoolBuildError};
 use eden_utils::signals::ShutdownSignal;
 use error_stack::{Report, ResultExt};
-use std::{fmt, sync::Arc};
+use std::{collections::HashSet, fmt, sync::Arc};
 use uuid::Uuid;
 
 #[derive(Debug, Builder)]
@@ -23,6 +23,27 @@ pub struct Kernel {
 }
 
 impl Kernel {
+    #[must_use]
+    pub fn resolve_mc_perks(&self, view: &McAccountView) -> Vec<String> {
+        let config = &self.config.minecraft.perks;
+
+        let mut set = HashSet::new();
+        let extra_perks = config
+            .others
+            .get(&UuidOrUsername::Username(view.username.clone()))
+            .or_else(|| config.others.get(&UuidOrUsername::Uuid(view.uuid)));
+
+        if let Some(extra_perks) = extra_perks {
+            set.extend(extra_perks);
+        }
+
+        if view.is_contributor {
+            set.extend(&config.contributors);
+        }
+
+        set.into_iter().cloned().collect::<Vec<_>>()
+    }
+
     #[tracing::instrument(skip_all, fields(?job))]
     pub async fn enqueue_job<J: BackgroundJob + fmt::Debug>(
         &self,

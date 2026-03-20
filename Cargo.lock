@@ -817,6 +817,7 @@ dependencies = [
  "constant_time_eq",
  "eden-toml",
  "eden-utils",
+ "eden-validation",
  "error-stack",
  "insta",
  "serde",
@@ -825,6 +826,7 @@ dependencies = [
  "toml_edit",
  "twilight-model",
  "unindent",
+ "uuid",
 ]
 
 [[package]]

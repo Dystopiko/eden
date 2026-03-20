@@ -8,10 +8,10 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+comrak = { version = "0.50.0", default-features = false, features = ["bon"] }
 regex = "1.12.3"
 rustrict = { version = "0.7.26", features = ["customize"] }
 url = "2.5.8"
-comrak = { version = "0.50.0", default-features = false, features = ["bon"] }
 
 [dev-dependencies]
 criterion = { workspace = true }

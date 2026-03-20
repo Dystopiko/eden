@@ -86,7 +86,8 @@ async fn grant_session(
         ));
     }
 
-    Ok(Session::member(body.ip, account))
+    let perks = kernel.resolve_mc_perks(&account);
+    Ok(Session::member(body.ip, account, perks))
 }
 
 struct Session {
@@ -99,7 +100,10 @@ enum GuestOrMember {
         account_type: McAccountType,
         uuid: Uuid,
     },
-    Member(McAccountView),
+    Member {
+        view: McAccountView,
+        perks: Vec<String>,
+    },
 }
 
 impl GuestOrMember {
@@ -107,7 +111,7 @@ impl GuestOrMember {
     const fn last_login_at(&self) -> Option<Timestamp> {
         match self {
             Self::Guest { .. } => None,
-            Self::Member(view) => view.last_login_at,
+            Self::Member { view, .. } => view.last_login_at,
         }
     }
 
@@ -115,7 +119,7 @@ impl GuestOrMember {
     const fn as_member(&self) -> Option<&McAccountView> {
         match self {
             Self::Guest { .. } => None,
-            Self::Member(view) => Some(view),
+            Self::Member { view, .. } => Some(view),
         }
     }
 
@@ -123,7 +127,7 @@ impl GuestOrMember {
     const fn uuid(&self) -> Uuid {
         match self {
             Self::Guest { uuid, .. } => *uuid,
-            Self::Member(view) => view.uuid,
+            Self::Member { view, .. } => view.uuid,
         }
     }
 
@@ -131,15 +135,15 @@ impl GuestOrMember {
     const fn mc_account_type(&self) -> McAccountType {
         match self {
             Self::Guest { account_type, .. } => *account_type,
-            Self::Member(view) => view.kind,
+            Self::Member { view, .. } => view.kind,
         }
     }
 
     #[must_use]
-    fn encode(self) -> Option<EncodedMember> {
+    fn encode(self) -> Option<(EncodedMember, Vec<String>)> {
         match self {
             Self::Guest { .. } => None,
-            Self::Member(view) => Some(view.into()),
+            Self::Member { view, perks } => Some((view.into(), perks)),
         }
     }
 }
@@ -154,10 +158,10 @@ impl Session {
     }
 
     #[must_use]
-    const fn member(ip_addr: IpAddr, view: McAccountView) -> Self {
+    const fn member(ip_addr: IpAddr, view: McAccountView, perks: Vec<String>) -> Self {
         Self {
             ip_addr,
-            view: GuestOrMember::Member(view),
+            view: GuestOrMember::Member { view, perks },
         }
     }
 
@@ -176,7 +180,7 @@ impl Session {
     #[must_use]
     const fn actor(&self) -> Actor {
         match &self.view {
-            GuestOrMember::Member(view) => Actor::Member(view.member_id.into_inner().cast()),
+            GuestOrMember::Member { view, .. } => Actor::Member(view.member_id.into_inner().cast()),
             GuestOrMember::Guest { .. } => Actor::Ip(self.ip_addr),
         }
     }
@@ -196,10 +200,16 @@ impl Session {
     }
 
     fn response(self) -> SessionGranted {
+        let last_login_at = self.view.last_login_at();
+        let (member, perks) = match self.view.encode() {
+            Some((member, perks)) => (Some(member), perks),
+            None => (None, Vec::new()),
+        };
+
         SessionGranted {
-            last_login_at: self.view.last_login_at(),
-            member: self.view.encode(),
-            perks: Vec::new(),
+            last_login_at,
+            member,
+            perks,
         }
     }
 }

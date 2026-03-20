@@ -2,7 +2,7 @@ use axum::{
     extract::{Extension, Json},
     response::{IntoResponse, Response},
 };
-use eden_database::primary_guild::{McAccount, Member};
+use eden_database::views::McAccountView;
 use eden_gateway_api::sessions::validate::{PlayerEntry, ValidatePlayers, ValidatePlayersResponse};
 use eden_sqlite::error::QueryResultExt;
 use std::{collections::HashMap, sync::Arc};
@@ -25,15 +25,19 @@ pub async fn validate(
     let mut conn = kernel.pools.db_read_prefer_primary().await?;
     let mut players = HashMap::new();
     for &id in body.players.iter() {
-        let Some(account) = McAccount::find_by_uuid(&mut conn, id).await.optional()? else {
+        let account = McAccountView::find_by_mc_uuid(&mut conn, id)
+            .await
+            .optional()?;
+
+        let Some(account) = account else {
             players.insert(id, None);
             continue;
         };
 
-        let member = Member::find_by_discord_user_id(&mut conn, account.discord_user_id).await?;
+        let perks = kernel.resolve_mc_perks(&account);
         let entry = PlayerEntry {
-            member: member.into(),
-            perks: Vec::new(),
+            member: account.into(),
+            perks,
         };
 
         players.insert(id, Some(entry));

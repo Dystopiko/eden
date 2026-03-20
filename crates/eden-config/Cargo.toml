@@ -10,6 +10,7 @@ repository.workspace = true
 [dependencies]
 eden-utils = { workspace = true, features = ["full"] }
 eden-toml = { workspace = true }
+eden-validation = { workspace = true }
 
 constant_time_eq = "0.4.2"
 error-stack = { workspace = true }
@@ -17,6 +18,7 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 toml_edit = { workspace = true }
 twilight-model = { workspace = true }
+uuid = { workspace = true }
 
 [dev-dependencies]
 bon = { workspace = true }

@@ -1,4 +1,5 @@
 pub mod chaos;
+pub mod contributor;
 pub mod logged_in_event;
 pub mod member;
 pub mod minecraft;

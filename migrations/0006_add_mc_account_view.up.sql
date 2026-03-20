@@ -6,6 +6,10 @@ SELECT
     mc_account.uuid,
     mc_account.username,
     mc_account."type",
+    EXISTS (
+        SELECT 1 FROM contributors
+        WHERE member_id = mc_account.discord_user_id
+    ) AS "is_contributor",
     last_session.created_at as "last_login_at"
 FROM minecraft_accounts mc_account
 LEFT JOIN (
