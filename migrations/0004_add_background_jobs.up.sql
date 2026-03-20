@@ -1,7 +1,7 @@
 -- JSON type for `data` is not needed. It will be used later when
 -- deserialization needed in `eden-background-worker` implementation.
 CREATE TABLE background_jobs (
-    id          VARCHAR(32) NOT NULL,
+    id          BLOB(32) NOT NULL,
     type        VARCHAR(255) NOT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT current_timestamp,
     data        TEXT NOT NULL,

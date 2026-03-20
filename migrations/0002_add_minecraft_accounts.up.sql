@@ -2,7 +2,7 @@ CREATE TABLE minecraft_accounts (
     id                  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     linked_at           TIMESTAMP NOT NULL DEFAULT current_timestamp,
     discord_user_id     BIGINT NOT NULL,
-    uuid                VARCHAR(32) NOT NULL UNIQUE,
+    uuid                BLOB(32) NOT NULL UNIQUE,
     username            VARCHAR(20) NOT NULL,
     "type"              VARCHAR(10) NOT NULL,
 

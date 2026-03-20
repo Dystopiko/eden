@@ -1,6 +1,6 @@
 CREATE TABLE logged_in_events (
-    event_id        VARCHAR(32) NOT NULL,
-    player_uuid     VARCHAR(32) NOT NULL,
+    event_id        BLOB(32) NOT NULL,
+    player_uuid     BLOB(32) NOT NULL,
 
     created_at      TIMESTAMP NOT NULL,
     username        VARCHAR(20),

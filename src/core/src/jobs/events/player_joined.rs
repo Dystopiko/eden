@@ -24,12 +24,12 @@ impl BackgroundJob for OnPlayerJoined {
         self.0.create(&mut conn).await?;
         conn.commit().await.map_err(ErasedReport::new)?;
 
-        let request = ctx
-            .discord
-            .create_message(todo!())
-            .content("Someone joined the server!");
+        // let request = ctx
+        //     .discord
+        //     .create_message(todo!())
+        //     .content("Someone joined the server!");
 
-        request.perform().await?;
+        // request.perform().await?;
         Ok(())
     }
 }

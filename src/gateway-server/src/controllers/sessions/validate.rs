@@ -3,10 +3,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use eden_database::primary_guild::{McAccount, Member};
-use eden_gateway_api::{
-    member::EncodedMember,
-    sessions::validate::{PlayerEntry, ValidatePlayers, ValidatePlayersResponse},
-};
+use eden_gateway_api::sessions::validate::{PlayerEntry, ValidatePlayers, ValidatePlayersResponse};
 use eden_sqlite::error::QueryResultExt;
 use std::{collections::HashMap, sync::Arc};
 
@@ -35,7 +32,7 @@ pub async fn validate(
 
         let member = Member::find_by_discord_user_id(&mut conn, account.discord_user_id).await?;
         let entry = PlayerEntry {
-            member: EncodedMember::from_db(member),
+            member: member.into(),
             perks: Vec::new(),
         };
 

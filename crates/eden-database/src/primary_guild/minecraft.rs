@@ -91,17 +91,17 @@ pub enum McAccountType {
     Bedrock,
 }
 
-impl McAccount {
-    /// Returns `true` if this account is a Java edition account.
+impl McAccountType {
+    /// Returns `true` if this account type is a Java edition account.
     #[must_use]
     pub const fn is_java(&self) -> bool {
-        matches!(self.kind, McAccountType::Java)
+        matches!(self, McAccountType::Java)
     }
 
-    /// Returns `true` if this account is a Bedrock edition account.
+    /// Returns `true` if this account type is a Bedrock edition account.
     #[must_use]
     pub const fn is_bedrock(&self) -> bool {
-        matches!(self.kind, McAccountType::Bedrock)
+        matches!(self, McAccountType::Bedrock)
     }
 }
 

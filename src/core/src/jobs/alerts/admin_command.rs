@@ -25,19 +25,19 @@ impl BackgroundJob for AdminCommandAlertJob {
         alert.executor = ?self.executor,
     ))]
     async fn run(&self, ctx: Self::Context) -> Result<(), ErasedReport> {
-        let content = match &self.executor {
-            Executor::Console => Cow::Borrowed("**Someone used a privileged command!!**"),
-            Executor::Player(info) => {
-                Cow::Owned(format!("**{} used a privileged command!!**", info.username))
-            }
-        };
+        // let content = match &self.executor {
+        //     Executor::Console => Cow::Borrowed("**Someone used a privileged command!!**"),
+        //     Executor::Player(info) => {
+        //         Cow::Owned(format!("**{} used a privileged command!!**", info.username))
+        //     }
+        // };
 
-        let request = ctx
-            .discord
-            .create_message(todo!())
-            .content(&content);
+        // let request = ctx
+        //     .discord
+        //     .create_message(todo!())
+        //     .content(&content);
 
-        request.perform().await?;
+        // request.perform().await?;
         Ok(())
     }
 }

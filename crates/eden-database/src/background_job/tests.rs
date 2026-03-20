@@ -1,11 +1,9 @@
+use eden_timestamp::Timestamp;
 use serde_json::json;
 use std::str::FromStr;
 use uuid::Uuid;
 
-use crate::{
-    background_job::{BackgroundJob, JobStatus},
-    timestamp::Timestamp,
-};
+use crate::background_job::{BackgroundJob, JobStatus};
 
 #[tokio::test]
 async fn test_requeue_or_fail_requeue_should_fail_retries_reached_max_retries() {

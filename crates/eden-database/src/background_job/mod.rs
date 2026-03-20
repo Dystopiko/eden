@@ -1,11 +1,10 @@
 use bon::Builder;
+use eden_timestamp::Timestamp;
 use error_stack::{Report, ResultExt};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use thiserror::Error;
 use uuid::Uuid;
-
-use crate::timestamp::Timestamp;
 
 #[derive(Clone, Debug, Deserialize, Eq, FromRow, PartialEq, Serialize)]
 pub struct BackgroundJob {
