@@ -55,6 +55,8 @@ pub enum ErrorCode {
     ServiceUnavailable,
     /// Maps to `429 Too Many Requests`
     RateLimited,
+    /// Maps to `403 Forbidden`
+    Forbidden,
 }
 
 impl ApiError {
@@ -183,6 +185,7 @@ impl From<ErrorCode> for StatusCode {
             ErrorCode::NotFound => StatusCode::NOT_FOUND,
             ErrorCode::InvalidRequest => StatusCode::BAD_REQUEST,
             ErrorCode::RateLimited => StatusCode::TOO_MANY_REQUESTS,
+            ErrorCode::Forbidden => StatusCode::FORBIDDEN,
         }
     }
 }

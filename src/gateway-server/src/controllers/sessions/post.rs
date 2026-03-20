@@ -32,7 +32,7 @@ pub async fn post(
     Validated(body): Validated<Json<RequestSession>>,
 ) -> ApiResult<Response> {
     let mut conn = kernel.pools.db_read_prefer_primary().await?;
-    let session = grant_session(&mut conn, &body, &logs).await?;
+    let session = grant_session(&kernel, &mut conn, &body, &logs).await?;
 
     // Make sure player is not logging in too frequently by determining
     // their IP address or the player's discord ID.
@@ -51,6 +51,7 @@ pub async fn post(
 }
 
 async fn grant_session(
+    kernel: &eden_core::Kernel,
     conn: &mut eden_sqlite::Connection,
     body: &RequestSession,
     logs: &RequestLogs,
@@ -67,6 +68,13 @@ async fn grant_session(
 
     logs.add("account.exists", account.is_some());
     let Some(account) = account else {
+        if !kernel.config.minecraft.allow_guests {
+            return Err(ApiError::from_static(
+                ErrorCode::Forbidden,
+                "Guest access is disabled by an administrator",
+            ));
+        }
+
         return Ok(Session::guest(body.ip, account_type, body.uuid));
     };
 
