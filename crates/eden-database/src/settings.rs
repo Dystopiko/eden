@@ -21,7 +21,7 @@ impl Settings {
         conn: &mut eden_sqlite::Transaction<'_>,
         guild_id: Id<GuildMarker>,
         setup: &InitialSettings,
-    ) -> Result<Settings, Report<SettingsQueryError>> {
+    ) -> Result<(Settings, bool), Report<SettingsQueryError>> {
         let existing = sqlx::query_as::<_, Settings>(
             r#"
             SELECT * FROM settings
@@ -34,10 +34,13 @@ impl Settings {
         .attach("while checking whether specific settings exists")?;
 
         if let Some(existing) = existing {
-            return Ok(existing);
+            return Ok((existing, true));
         }
 
-        Self::upsert(guild_id, setup).perform(conn).await
+        Self::upsert(guild_id, setup)
+            .perform(conn)
+            .await
+            .map(|v| (v, false))
     }
 
     pub fn upsert(guild_id: Id<GuildMarker>, setup: &InitialSettings) -> UpsertSettings {

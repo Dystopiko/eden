@@ -72,7 +72,7 @@ impl Kernel {
             .await
             .change_context(SettingsQueryError)?;
 
-        let settings = Settings::find_or_insert(
+        let (settings, _) = Settings::find_or_insert(
             &mut conn,
             self.config.bot.primary_guild.id,
             &self.config.setup.settings,
