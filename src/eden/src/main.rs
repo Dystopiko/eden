@@ -7,6 +7,7 @@ use eden_core::{
 use eden_utils::signals::ShutdownSignal;
 use erased_report::ErasedReport;
 use error_stack::{Report, ResultExt};
+use futures::TryFutureExt;
 use std::{path::Path, sync::Arc};
 
 fn main() -> Result<(), ErasedReport> {
@@ -39,7 +40,7 @@ fn main() -> Result<(), ErasedReport> {
         let http = Arc::new(twilight_http::Client::builder().token(token).build());
 
         let job_context = JobContext::builder()
-            .discord(http)
+            .discord(http.clone())
             .kernel(kernel.clone())
             .build();
 
@@ -50,7 +51,16 @@ fn main() -> Result<(), ErasedReport> {
             .workers(1)
             .start();
 
-        let gateway = eden_gateway_server::service(kernel.clone());
+        let discord = eden_discord_bot::service(kernel.clone(), http.clone())
+            .map_err(|report| ErasedReport::from_report(report));
+
+        let shutdown_signal = kernel.shutdown_signal.clone();
+        let gateway = eden_gateway_server::service(kernel.clone())
+            .inspect_err(|_| {
+                tracing::warn!("gateway service failed! initiating shutdown");
+                shutdown_signal.initiate();
+            })
+            .map_err(|report| ErasedReport::from_report(report));
 
         let shutdown_signal = kernel.shutdown_signal.clone();
         tokio::spawn(async move {
@@ -59,9 +69,10 @@ fn main() -> Result<(), ErasedReport> {
             shutdown_signal.initiate();
         });
 
-        gateway.await?;
+        let result = tokio::try_join!(discord, gateway);
         workers_handle.shutdown().await;
-        Ok(())
+
+        result.map(|_| ())
     });
 
     tracing::info!("closing down Eden");

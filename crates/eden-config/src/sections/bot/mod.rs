@@ -2,6 +2,7 @@ use constant_time_eq::constant_time_eq;
 use eden_toml::TomlDiagnostic;
 use error_stack::Report;
 use serde::Deserialize;
+use twilight_model::id::{Id, marker::ApplicationMarker};
 
 pub mod primary_guild;
 pub use self::primary_guild::PrimaryGuild;
@@ -11,8 +12,15 @@ use crate::validate::{Validate, ValidationContext};
 /// Configuration for the Discord bot.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Bot {
+    #[serde(default = "default_application_id")]
+    pub application_id: Id<ApplicationMarker>,
     pub primary_guild: PrimaryGuild,
     pub token: Token,
+}
+
+#[must_use]
+pub const fn default_application_id() -> Id<ApplicationMarker> {
+    Id::new_checked(1).expect("one should be a valid Discord ID")
 }
 
 impl Validate for Bot {

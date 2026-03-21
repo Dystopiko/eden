@@ -35,13 +35,17 @@ impl BackgroundJob for OnPlayerJoined {
             return Ok(());
         }
 
-        let Some(alert_channel_id) = ctx.kernel.config.bot.primary_guild.alert_channel_id else {
+        let Some(channel_id) = ctx.kernel.config.bot.primary_guild.alert_channel_id else {
             return Ok(());
         };
 
+        if !ctx.kernel.can_send_alerts_to_discord(channel_id, None) {
+            return Ok(());
+        }
+
         let embed = generate_alert_embed(event);
         ctx.discord
-            .create_message(alert_channel_id)
+            .create_message(channel_id)
             .content("**A guest player joined the server!**")
             .embeds(&[embed])
             .perform()

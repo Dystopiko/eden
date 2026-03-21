@@ -6,6 +6,7 @@ use eden_sqlite::{Pool, error::PoolBuildError};
 use eden_utils::signals::ShutdownSignal;
 use error_stack::{Report, ResultExt};
 use std::{collections::HashSet, fmt, sync::Arc};
+use twilight_cache_inmemory::{InMemoryCache, ResourceType};
 use uuid::Uuid;
 
 #[derive(Debug, Builder)]
@@ -13,6 +14,10 @@ use uuid::Uuid;
 pub struct Kernel {
     /// App configuration
     pub config: Arc<Config>,
+
+    /// In-memory cache holding almost all Discord models acquired from gateway events.
+    #[builder(default = default_in_memory_cache())]
+    pub discord_cache: Arc<InMemoryCache>,
 
     /// Database connection pool connected to either primary or
     /// primary+replica databases
@@ -126,6 +131,14 @@ impl<S: kernel_builder::State> KernelBuilder<S> {
     {
         Arc::new(self.build_inner())
     }
+}
+
+fn default_in_memory_cache() -> Arc<InMemoryCache> {
+    let cache = InMemoryCache::builder()
+        .resource_types(ResourceType::GUILD | ResourceType::MEMBER | ResourceType::ROLE)
+        .build();
+
+    Arc::new(cache)
 }
 
 fn pool_from_config(

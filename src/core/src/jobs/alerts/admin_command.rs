@@ -31,9 +31,13 @@ impl BackgroundJob for AdminCommandAlertJob {
     ))]
     async fn run(&self, ctx: Self::Context) -> Result<(), ErasedReport> {
         let alert = &self.0;
-        let Some(alert_channel_id) = ctx.kernel.config.bot.primary_guild.alert_channel_id else {
+        let Some(channel_id) = ctx.kernel.config.bot.primary_guild.alert_channel_id else {
             return Ok(());
         };
+
+        if !ctx.kernel.can_send_alerts_to_discord(channel_id, None) {
+            return Ok(());
+        }
 
         let partial_embed = EmbedBuilder::new()
             .title(format!("`{}`", strip_markdown(&alert.command)))
@@ -54,7 +58,7 @@ impl BackgroundJob for AdminCommandAlertJob {
 
         let embed = embed.build();
         ctx.discord
-            .create_message(alert_channel_id)
+            .create_message(channel_id)
             .content(&content)
             .embeds(&[embed])
             .perform()

@@ -10,6 +10,7 @@ repository.workspace = true
 eden-background-worker = { workspace = true }
 eden-config = { workspace = true }
 eden-core = { path = "../core" }
+eden-discord-bot = { path = "../discord-bot" }
 eden-gateway-server = { path = "../gateway-server" }
 eden-database = { workspace = true }
 eden-sqlite = { workspace = true }
@@ -17,6 +18,7 @@ eden-utils = { workspace = true }
 
 erased-report = { workspace = true }
 error-stack = { workspace = true }
+futures = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
