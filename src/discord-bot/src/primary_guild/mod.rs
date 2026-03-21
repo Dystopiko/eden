@@ -77,6 +77,7 @@ pub async fn send_welcome_message(
         .await
         .change_context(SendWelcomeMessageError)?;
 
+    tracing::info!("sent welcome message");
     Ok(())
 }
 

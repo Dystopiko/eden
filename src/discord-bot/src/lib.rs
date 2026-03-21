@@ -13,6 +13,7 @@ use twilight_standby::Standby;
 
 mod event;
 mod primary_guild;
+mod triggers;
 
 use self::event::EventContext;
 
