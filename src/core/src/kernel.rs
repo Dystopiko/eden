@@ -134,11 +134,12 @@ impl<S: kernel_builder::State> KernelBuilder<S> {
 }
 
 fn default_in_memory_cache() -> Arc<InMemoryCache> {
-    let cache = InMemoryCache::builder()
-        .resource_types(ResourceType::GUILD | ResourceType::MEMBER | ResourceType::ROLE)
-        .build();
+    let wants = ResourceType::GUILD
+        | ResourceType::MEMBER
+        | ResourceType::ROLE
+        | ResourceType::USER_CURRENT;
 
-    Arc::new(cache)
+    Arc::new(InMemoryCache::builder().resource_types(wants).build())
 }
 
 fn pool_from_config(

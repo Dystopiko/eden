@@ -3,7 +3,6 @@ use crossbeam::atomic::AtomicCell;
 use eden_core::Kernel;
 use splinter::ShardHandle;
 use std::sync::Arc;
-use twilight_cache_inmemory::InMemoryCache;
 use twilight_gateway::Event;
 use twilight_model::id::{Id, marker::ApplicationMarker};
 use twilight_standby::Standby;
@@ -16,7 +15,6 @@ mod ready;
 #[allow(unused)]
 pub struct EventContext {
     pub application_id: Arc<AtomicCell<Id<ApplicationMarker>>>,
-    pub cache: Arc<InMemoryCache>,
     pub kernel: Arc<Kernel>,
     pub http: Arc<twilight_http::Client>,
     pub shard: ShardHandle,

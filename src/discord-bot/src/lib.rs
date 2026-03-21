@@ -7,7 +7,6 @@ use std::{sync::Arc, time::Duration};
 use thiserror::Error;
 use tokio::time::MissedTickBehavior;
 use tokio_util::task::TaskTracker;
-use twilight_cache_inmemory::InMemoryCache;
 use twilight_gateway::{CloseFrame, EventTypeFlags, Intents, queue::InMemoryQueue};
 use twilight_standby::Standby;
 
@@ -150,16 +149,14 @@ async fn dispatch_events(
     tracing::debug!("event dispatcher started");
 
     let application_id = Arc::new(AtomicCell::new(kernel.config.bot.application_id));
-    let cache = Arc::new(InMemoryCache::new());
     let standby = Arc::new(Standby::new());
 
     while let Some((shard, event)) = stream.next().await {
-        cache.update(&event);
+        kernel.discord_cache.update(&event);
         standby.process(&event);
 
         let ctx = EventContext::builder()
             .application_id(application_id.clone())
-            .cache(cache.clone())
             .kernel(kernel.clone())
             .http(http.clone())
             .shard(shard)
