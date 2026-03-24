@@ -247,7 +247,6 @@ mod tests {
     async fn should_cancel_existing_in_progress_when_inserting() {
         let pool = crate::testing::setup().await;
 
-        let uuid = Uuid::new_v4();
         let username = "alex";
         let ip = IpAddr::V4(Ipv4Addr::LOCALHOST);
 
@@ -255,7 +254,7 @@ mod tests {
 
         // Insert an existing in-progress attempt via raw SQL
         let existing_id = Uuid::new_v4();
-        McAccountChallenge::new_challenge()
+        let (old_challenge_id, _) = McAccountChallenge::new_challenge()
             .uuid(existing_id)
             .hashed_code("hello")
             .username(username)
@@ -269,7 +268,7 @@ mod tests {
 
         // Insert a new attempt which should cancel the existing one
         McAccountChallenge::new_challenge()
-            .uuid(uuid)
+            .uuid(existing_id)
             .hashed_code("hello")
             .username(username)
             .ip_address(ip)
@@ -282,13 +281,14 @@ mod tests {
 
         // Fetch the existing attempt and ensure its status is now cancelled
         let existing: McAccountChallenge =
-            sqlx::query_as("SELECT * FROM mc_account_challenges WHERE id = ?")
+            sqlx::query_as("SELECT * FROM mc_account_challenges WHERE uuid = ? AND id = ?")
                 .bind(existing_id)
+                .bind(old_challenge_id)
                 .fetch_one(&mut *conn)
                 .await
                 .unwrap();
 
-        assert_eq!(existing.hashed_code, "hello");
+        assert_eq!(existing.hashed_code, "<deleted>");
         assert_eq!(existing.status, McAccountChallengeStatus::Cancelled);
     }
 }
