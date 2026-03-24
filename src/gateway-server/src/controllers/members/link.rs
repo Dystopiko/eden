@@ -96,6 +96,9 @@ pub async fn minecraft(
 }
 
 async fn generate_challenge_code() -> ApiResult<String> {
+    // Minimum words to have a challenge code.
+    const MIN_WORDS: usize = 3;
+
     // Minimum characters to have a challenge code.
     const MIN_CHARS: usize = 25;
 
@@ -106,17 +109,22 @@ async fn generate_challenge_code() -> ApiResult<String> {
     spawn_blocking(|| {
         let mut rng = rand::rng();
         let mut code = String::with_capacity(MIN_CHARS);
-        for word in random_words(&mut rng) {
+        let mut words = random_words(&mut rng).enumerate().map(|(t, w)| (t + 1, w));
+
+        loop {
+            let (words_generated, word) = words
+                .next()
+                .expect("random_words should provide continuous stream of words");
+
+            if words_generated >= MIN_WORDS && code.len() >= MIN_CHARS {
+                return code;
+            }
+
             if code.chars().count() != 0 {
                 code.push('-');
             }
             code.push_str(word);
-
-            if code.len() >= MIN_CHARS {
-                break;
-            }
         }
-        code
     })
     .await
     .change_context(GeneratorPanicked)
