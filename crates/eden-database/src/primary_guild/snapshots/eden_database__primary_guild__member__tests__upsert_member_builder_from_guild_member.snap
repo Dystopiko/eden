@@ -8,4 +8,5 @@ UpsertMember {
         2022-01-01T00:00:00Z,
     ),
     name: "foo",
+    invited_by: None,
 }

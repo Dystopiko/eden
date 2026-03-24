@@ -14,6 +14,8 @@ pub struct MemberView {
     pub joined_at: Timestamp,
     pub name: String,
     pub rank: MemberRank,
+    pub invited_by: Option<Snowflake>,
+    pub inviter_name: Option<String>,
 }
 
 /// Error type representing a failure to query with the [`MemberView`] table.
@@ -90,6 +92,29 @@ mod tests {
         primary_guild::{Member, contributor::Contributor, staff::Staff},
         views::{MemberRank, MemberView},
     };
+
+    #[tokio::test]
+    async fn should_include_inviter() {
+        let pool = crate::testing::setup().await;
+        let mut conn = pool.begin().await.unwrap();
+
+        let steve = setup_member(&mut conn).await;
+        let alex = Member::upsert()
+            .discord_user_id(Id::new(12345))
+            .name("alex")
+            .invited_by(steve.discord_user_id.cast())
+            .build()
+            .perform(&mut conn)
+            .await
+            .unwrap();
+
+        let alex_view = MemberView::find_by_discord_user_id(&mut conn, alex.discord_user_id.cast())
+            .await
+            .unwrap();
+
+        assert_eq!(alex_view.invited_by, Some(steve.discord_user_id));
+        assert_eq!(alex_view.inviter_name.as_deref(), Some(&*steve.name));
+    }
 
     #[tokio::test]
     async fn rank_should_be_member_by_default() {

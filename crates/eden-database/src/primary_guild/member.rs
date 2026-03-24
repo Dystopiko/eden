@@ -17,6 +17,7 @@ pub struct Member {
     pub joined_at: Timestamp,
     pub name: String,
     pub updated_at: Option<Timestamp>,
+    pub invited_by: Option<Snowflake>,
 }
 
 impl Member {
@@ -53,6 +54,7 @@ pub struct UpsertMember<'a> {
     #[builder(default = Timestamp::now())]
     pub joined_at: Timestamp,
     pub name: &'a str,
+    pub invited_by: Option<Id<UserMarker>>,
 }
 
 impl<'a> UpsertMember<'a> {
@@ -62,17 +64,19 @@ impl<'a> UpsertMember<'a> {
     ) -> Result<Member, Report<MemberQueryError>> {
         sqlx::query_as::<_, Member>(
             r#"
-            INSERT INTO members (discord_user_id, joined_at, name)
-            VALUES (?, ?, ?)
+            INSERT INTO members (discord_user_id, joined_at, name, invited_by)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT (discord_user_id)
                 DO UPDATE
                 SET name = excluded.name,
-                    updated_at = current_timestamp
+                    updated_at = current_timestamp,
+                    invited_by = excluded.invited_by
             RETURNING *"#,
         )
         .bind(Snowflake::new(self.discord_user_id.cast()))
         .bind(self.joined_at)
         .bind(self.name)
+        .bind(self.invited_by.map(|v| Snowflake::new(v.cast())))
         .fetch_one(&mut **conn)
         .await
         .change_context(MemberQueryError)
