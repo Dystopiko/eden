@@ -7,7 +7,7 @@ use eden_core::{
 use eden_utils::signals::ShutdownSignal;
 use erased_report::ErasedReport;
 use error_stack::{Report, ResultExt};
-use futures::TryFutureExt;
+use futures::{FutureExt, TryFutureExt};
 use std::{path::Path, sync::Arc};
 
 fn main() -> Result<(), ErasedReport> {
@@ -51,8 +51,14 @@ fn main() -> Result<(), ErasedReport> {
             .workers(1)
             .start();
 
-        let discord = eden_discord_bot::service(kernel.clone(), http.clone())
-            .map_err(|report| ErasedReport::from_report(report));
+        let discord = if kernel.config.bot.enabled {
+            eden_discord_bot::service(kernel.clone(), http.clone())
+                .map_err(|report| ErasedReport::from_report(report))
+                .boxed()
+        } else {
+            tracing::warn!("Discord service is disabled");
+            async { Ok::<(), ErasedReport>(()) }.boxed()
+        };
 
         let shutdown_signal = kernel.shutdown_signal.clone();
         let gateway = eden_gateway_server::service(kernel.clone())

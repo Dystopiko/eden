@@ -14,6 +14,8 @@ use crate::validate::{Validate, ValidationContext};
 pub struct Bot {
     #[serde(default = "default_application_id")]
     pub application_id: Id<ApplicationMarker>,
+    #[serde(default = "default_enabled")]
+    pub enabled: bool,
     pub primary_guild: PrimaryGuild,
     pub token: Token,
 }
@@ -21,6 +23,11 @@ pub struct Bot {
 #[must_use]
 pub const fn default_application_id() -> Id<ApplicationMarker> {
     Id::new_checked(1).expect("one should be a valid Discord ID")
+}
+
+#[must_use]
+const fn default_enabled() -> bool {
+    true
 }
 
 impl Validate for Bot {
