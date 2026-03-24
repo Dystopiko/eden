@@ -35,8 +35,10 @@ erased-report = { path = "crates/erased-report" }
 error-stack = "0.6.0"
 thiserror = "2.0.18"
 
-# Encoding and string processing
+# Encoding, cryptography and string processing
+hex = "0.4.3"
 percent-encoding = "2.3.2"
+sha2 = "0.10.9"
 unindent = "0.2.4"
 
 # Testing

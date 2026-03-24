@@ -3,7 +3,7 @@ use eden_timestamp::Timestamp;
 use error_stack::{Report, ResultExt};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
-use std::{net::IpAddr, str::FromStr};
+use std::net::IpAddr;
 use thiserror::Error;
 use twilight_model::id::{Id, marker::UserMarker};
 use uuid::Uuid;
@@ -16,7 +16,7 @@ pub struct LoggedInEvent {
     pub player_uuid: Uuid,
     pub created_at: Timestamp,
     pub username: String,
-    #[sqlx(try_from = "IpAddrString")]
+    #[sqlx(try_from = "crate::extractors::IpAddrString")]
     pub ip_address: IpAddr,
     #[sqlx(rename = "type")]
     pub kind: McAccountType,
@@ -74,26 +74,5 @@ impl NewLoggedInEvent {
         .attach("while trying to log login event")?;
 
         Ok(())
-    }
-}
-
-struct IpAddrString(String);
-
-impl<'r> sqlx::Decode<'r, sqlx::Sqlite> for IpAddrString
-where
-    String: sqlx::Decode<'r, sqlx::Sqlite>,
-{
-    fn decode(
-        value: <sqlx::Sqlite as sqlx::Database>::ValueRef<'r>,
-    ) -> Result<Self, sqlx::error::BoxDynError> {
-        String::decode(value).map(Self)
-    }
-}
-
-impl TryFrom<IpAddrString> for IpAddr {
-    type Error = <IpAddr as FromStr>::Err;
-
-    fn try_from(value: IpAddrString) -> Result<Self, Self::Error> {
-        value.0.parse()
     }
 }

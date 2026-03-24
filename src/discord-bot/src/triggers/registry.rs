@@ -1,10 +1,10 @@
-use error_stack::Report;
+use erased_report::ErasedReport;
 use std::{pin::Pin, sync::Arc};
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
 use crate::{
     event::EventContext,
-    triggers::{EventTrigger, EventTriggerResult, TriggerError},
+    triggers::{EventTrigger, EventTriggerResult},
 };
 
 #[must_use]
@@ -45,7 +45,7 @@ fn on_message_create<'a, T: EventTrigger + 'static>(
     Box::pin(T::on_message_create(ctx, message))
 }
 
-type TriggerResult = Result<EventTriggerResult, Report<TriggerError>>;
+type TriggerResult = Result<EventTriggerResult, ErasedReport>;
 type TriggerFuture<'a> = Pin<Box<dyn Future<Output = TriggerResult> + Send + 'a>>;
 type TriggerCallback<T> =
     dyn for<'a> Fn(&'a EventContext, &'a T) -> TriggerFuture<'a> + Send + Sync;

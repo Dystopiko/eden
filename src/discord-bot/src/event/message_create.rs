@@ -1,7 +1,10 @@
 use tracing::Instrument;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
-use crate::{event::EventContext, triggers::EventTriggerResult};
+use crate::{
+    event::EventContext,
+    triggers::{EventTriggerResult, TriggerError},
+};
 
 #[tracing::instrument(
     skip_all,
@@ -36,7 +39,8 @@ pub async fn handle(ctx: &EventContext, message: Box<MessageCreate>) {
 
         let result = (*trigger.on_message_create)(ctx, &message)
             .instrument(span.clone())
-            .await;
+            .await
+            .map_err(|r| r.change_context(TriggerError));
 
         let next = match result {
             Ok(next) => next,

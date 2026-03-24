@@ -1,6 +1,6 @@
 use eden_database::{primary_guild::Member, views::McAccountView};
 
-use crate::member::EncodedMember;
+use crate::members::EncodedMember;
 
 impl From<Member> for EncodedMember {
     fn from(member: Member) -> Self {

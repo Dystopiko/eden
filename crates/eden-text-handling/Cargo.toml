@@ -9,6 +9,8 @@ repository.workspace = true
 
 [dependencies]
 comrak = { version = "0.50.0", default-features = false, features = ["bon"] }
+include-lines = "1.1.2"
+rand = { workspace = true }
 regex = "1.12.3"
 rustrict = { version = "0.7.26", features = ["customize"] }
 url = "2.5.8"

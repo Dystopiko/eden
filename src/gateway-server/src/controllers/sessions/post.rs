@@ -10,7 +10,7 @@ use eden_database::{
     views::mc_account::McAccountView,
 };
 use eden_gateway_api::{
-    member::EncodedMember,
+    members::EncodedMember,
     sessions::request::{RequestSession, SessionGranted},
 };
 use eden_sqlite::error::QueryResultExt;

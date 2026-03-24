@@ -22,14 +22,14 @@ pub struct Member {
 impl Member {
     pub async fn find_by_discord_user_id(
         conn: &mut eden_sqlite::Connection,
-        id: Snowflake,
+        id: Id<UserMarker>,
     ) -> Result<Self, Report<MemberQueryError>> {
         sqlx::query_as::<_, Member>(
             r#"
             SELECT * FROM members
             WHERE discord_user_id = ?"#,
         )
-        .bind(id)
+        .bind(Snowflake::new(id.cast()))
         .fetch_one(conn)
         .await
         .change_context(MemberQueryError)

@@ -1,6 +1,7 @@
 use regex::Regex;
 use std::sync::LazyLock;
 
+pub mod generator;
 pub mod markdown;
 pub mod swearing;
 

@@ -1,13 +1,13 @@
 use eden_text_handling::swearing::RustrictType;
 use eden_twilight::{PERMISSIONS_TO_SEND, http::ResponseFutureExt};
-use error_stack::{Report, ResultExt};
+use erased_report::ErasedReport;
 use std::time::Instant;
 use tokio::task::spawn_blocking;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
 use crate::{
     event::EventContext,
-    triggers::{EventTrigger, EventTriggerResult, TriggerError},
+    triggers::{EventTrigger, EventTriggerResult},
 };
 
 pub struct SwearingPolice;
@@ -16,7 +16,7 @@ impl EventTrigger for SwearingPolice {
     async fn on_message_create(
         ctx: &EventContext,
         message: &MessageCreate,
-    ) -> Result<EventTriggerResult, Report<TriggerError>> {
+    ) -> Result<EventTriggerResult, ErasedReport> {
         let Some(guild_id) = message.guild_id else {
             return Ok(EventTriggerResult::Next);
         };
@@ -59,8 +59,7 @@ impl EventTrigger for SwearingPolice {
             .reply(message.id)
             .content("Please stop swearing!")
             .perform()
-            .await
-            .change_context(TriggerError)?;
+            .await?;
 
         Ok(EventTriggerResult::Next)
     }

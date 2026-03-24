@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 use uuid::Uuid;
 
-use crate::member::EncodedMember;
+use crate::members::EncodedMember;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "server", derive(validator::Validate))]

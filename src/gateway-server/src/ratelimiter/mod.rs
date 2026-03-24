@@ -160,6 +160,7 @@ pub enum Actor {
 pub enum LimitedAction {
     RequestSession { guest: bool },
     ValidateSessions,
+    LinkMinecraftAccount,
 }
 
 impl LimitedAction {
@@ -168,6 +169,9 @@ impl LimitedAction {
         match self {
             Self::RequestSession { .. } => "You have joined the server too quickly!",
             Self::ValidateSessions => "You requested validation of players' sessions too quickly!",
+            Self::LinkMinecraftAccount => {
+                "You have requested to link your Minecraft account too quickly! Please try again later."
+            }
         }
     }
 
@@ -192,6 +196,12 @@ impl LimitedAction {
             // the use of it to prevent DDoS.
             Self::ValidateSessions => BucketConfig {
                 max_global_requests: 3,
+                max_requests: 3,
+                reset_interval: Duration::from_mins(1),
+            },
+
+            Self::LinkMinecraftAccount => BucketConfig {
+                max_global_requests: 15,
                 max_requests: 3,
                 reset_interval: Duration::from_mins(1),
             },

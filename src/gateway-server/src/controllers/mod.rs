@@ -3,6 +3,7 @@ use serde_json::{Value, json};
 
 pub mod admin;
 pub mod alerts;
+pub mod members;
 pub mod sessions;
 
 pub async fn index() -> Json<Value> {

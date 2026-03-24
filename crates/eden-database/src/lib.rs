@@ -12,4 +12,5 @@ pub use self::snowflake::Snowflake;
 
 pub use eden_timestamp::Timestamp;
 
+mod extractors;
 pub mod testing;

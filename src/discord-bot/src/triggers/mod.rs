@@ -1,22 +1,26 @@
 use eden_config::Config;
-use error_stack::Report;
+use erased_report::ErasedReport;
 use std::sync::OnceLock;
 use thiserror::Error;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
 pub mod registry;
+pub mod solve_mc_account_challenge;
 pub mod swearing_police;
 
 pub use self::registry::EventTriggerRegistry;
 
-use self::swearing_police::SwearingPolice;
 use crate::event::EventContext;
 
 static LOADED_TRIGGER_REGISTRY: OnceLock<EventTriggerRegistry> = OnceLock::new();
 
 #[allow(unused)]
 pub fn init_registry(config: &Config) -> &EventTriggerRegistry {
-    LOADED_TRIGGER_REGISTRY.get_or_init(|| EventTriggerRegistry::new().register::<SwearingPolice>())
+    LOADED_TRIGGER_REGISTRY.get_or_init(|| {
+        EventTriggerRegistry::new()
+            .register::<self::swearing_police::SwearingPolice>()
+            .register::<self::solve_mc_account_challenge::SolveMcAccountChallenge>()
+    })
 }
 
 #[allow(unused)]
@@ -36,7 +40,7 @@ pub trait EventTrigger: Send + Sync {
     fn on_message_create(
         ctx: &EventContext,
         message: &MessageCreate,
-    ) -> impl Future<Output = Result<EventTriggerResult, Report<TriggerError>>> + Send {
+    ) -> impl Future<Output = Result<EventTriggerResult, ErasedReport>> + Send {
         async { Ok(EventTriggerResult::Next) }
     }
 }

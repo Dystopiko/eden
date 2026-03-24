@@ -1,5 +1,5 @@
 pub mod alerts;
-pub mod member;
+pub mod members;
 pub mod minecraft;
 pub mod sessions;
 pub mod settings;
