@@ -33,7 +33,7 @@ impl Member {
         .fetch_one(conn)
         .await
         .change_context(MemberQueryError)
-        .attach("while trying to find player by user id")
+        .attach("while trying to find member by user id")
     }
 
     pub fn upsert<'a>() -> UpsertMemberBuilder<'a> {

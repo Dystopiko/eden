@@ -4,6 +4,7 @@ pub mod logged_in_event;
 pub mod mc_account_challenge;
 pub mod member;
 pub mod minecraft;
+pub mod staff;
 
 pub use self::chaos::Chaos;
 pub use self::logged_in_event::LoggedInEvent;

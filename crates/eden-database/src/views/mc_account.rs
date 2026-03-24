@@ -4,18 +4,18 @@ use sqlx::FromRow;
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::{primary_guild::McAccountType, snowflake::Snowflake};
+use crate::{primary_guild::McAccountType, snowflake::Snowflake, views::MemberRank};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct McAccountView {
     pub member_id: Snowflake,
     pub member_name: String,
+    pub member_rank: MemberRank,
     pub joined_at: Timestamp,
     pub uuid: Uuid,
     pub username: String,
     #[sqlx(rename = "type")]
     pub kind: McAccountType,
-    pub is_contributor: bool,
     pub last_login_at: Option<Timestamp>,
 }
 
@@ -53,7 +53,7 @@ mod tests {
         primary_guild::{
             LoggedInEvent, McAccount, McAccountType, Member, contributor::Contributor,
         },
-        views::McAccountView,
+        views::{McAccountView, MemberRank},
     };
 
     async fn setup(conn: &mut eden_sqlite::Transaction<'_>) -> (Member, McAccount) {
@@ -96,7 +96,7 @@ mod tests {
         assert_eq!(view.uuid, account.uuid);
         assert_eq!(view.username, account.username);
         assert_eq!(view.kind, account.kind);
-        assert!(view.is_contributor);
+        assert_eq!(view.member_rank, MemberRank::Contributor);
     }
 
     #[tokio::test]
@@ -138,7 +138,7 @@ mod tests {
         assert_eq!(view.username, account.username);
         assert_eq!(view.kind, account.kind);
         assert_eq!(view.last_login_at, Some(timestamp));
-        assert!(!view.is_contributor);
+        assert_eq!(view.member_rank, MemberRank::Member);
 
         assert_eq!(view.member_id, member.discord_user_id);
         assert_eq!(view.member_name, member.name);
@@ -160,7 +160,7 @@ mod tests {
         assert_eq!(view.username, account.username);
         assert_eq!(view.kind, account.kind);
         assert_eq!(view.last_login_at, None);
-        assert!(!view.is_contributor);
+        assert_eq!(view.member_rank, MemberRank::Member);
 
         assert_eq!(view.member_id, member.discord_user_id);
         assert_eq!(view.member_name, member.name);

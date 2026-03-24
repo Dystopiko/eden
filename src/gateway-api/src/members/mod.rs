@@ -7,4 +7,5 @@ pub mod link;
 pub struct EncodedMember {
     pub id: Id<UserMarker>,
     pub name: String,
+    pub rank: String,
 }

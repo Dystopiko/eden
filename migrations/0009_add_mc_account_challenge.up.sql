@@ -1,5 +1,5 @@
 CREATE TABLE mc_account_challenges (
-    id   BLOB(32) NOT NULL PRIMARY KEY,
+    id             BLOB(32) NOT NULL PRIMARY KEY,
     hashed_code    VARCHAR(255) NOT NULL,
 
     created_at     TIMESTAMP NOT NULL,
@@ -13,5 +13,6 @@ CREATE TABLE mc_account_challenges (
     "status"       VARCHAR(10) NOT NULL DEFAULT 'in-progress',
     updated_at     TIMESTAMP,
 
-    CONSTRAINT mac_status_type_enum CHECK ("status" IN ('done', 'in-progress', 'cancelled'))
+    CONSTRAINT mac_status_type_enum
+        CHECK ("status" IN ('done', 'in-progress', 'cancelled'))
 );

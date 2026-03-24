@@ -1,12 +1,13 @@
-use eden_database::{primary_guild::Member, views::McAccountView};
+use eden_database::views::{McAccountView, MemberView};
 
 use crate::members::EncodedMember;
 
-impl From<Member> for EncodedMember {
-    fn from(member: Member) -> Self {
+impl From<MemberView> for EncodedMember {
+    fn from(member: MemberView) -> Self {
         Self {
             id: member.discord_user_id.cast(),
             name: member.name,
+            rank: member.rank.to_string(),
         }
     }
 }
@@ -16,6 +17,7 @@ impl From<McAccountView> for EncodedMember {
         Self {
             id: view.member_id.cast(),
             name: view.member_name,
+            rank: view.member_rank.to_string(),
         }
     }
 }

@@ -42,8 +42,12 @@ impl Kernel {
             set.extend(extra_perks);
         }
 
-        if view.is_contributor {
+        if view.member_rank.is_contributor() {
             set.extend(&config.contributors);
+        }
+
+        if view.member_rank.is_staff() {
+            set.extend(&config.staff);
         }
 
         set.into_iter().cloned().collect::<Vec<_>>()

@@ -26,6 +26,7 @@ impl Default for Minecraft {
 pub struct Perks {
     pub contributors: Vec<String>,
     pub member: Vec<String>,
+    pub staff: Vec<String>,
     #[serde(flatten)]
     pub others: HashMap<UuidOrUsername, Vec<String>>,
 }
