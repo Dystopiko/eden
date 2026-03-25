@@ -5,6 +5,7 @@ use thiserror::Error;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
 pub mod chaosneco;
+pub mod introduce_back;
 pub mod registry;
 pub mod solve_mc_account_challenge;
 pub mod swearing_police;
@@ -19,6 +20,7 @@ static LOADED_TRIGGER_REGISTRY: OnceLock<EventTriggerRegistry> = OnceLock::new()
 pub fn init_registry(config: &Config) -> &EventTriggerRegistry {
     LOADED_TRIGGER_REGISTRY.get_or_init(|| {
         EventTriggerRegistry::new()
+            .register::<self::introduce_back::IntroduceBack>()
             .register::<self::chaosneco::ChaosNecoEmoticon>()
             .register::<self::swearing_police::SwearingPolice>()
             .register::<self::solve_mc_account_challenge::SolveMcAccountChallenge>()

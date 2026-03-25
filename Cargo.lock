@@ -1074,6 +1074,7 @@ dependencies = [
  "hex",
  "num-format",
  "rand 0.10.0",
+ "regex",
  "sha2",
  "splinter",
  "thiserror 2.0.18",
@@ -1084,6 +1085,7 @@ dependencies = [
  "twilight-cache-inmemory",
  "twilight-gateway",
  "twilight-http",
+ "twilight-mention",
  "twilight-model",
  "twilight-standby",
  "twilight-util",
@@ -4475,6 +4477,15 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "twilight-mention"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4aebfdf7f045520f52ad09d2c2cd50f138afccccbf92a2647d463d7d04e10b0"
+dependencies = [
+ "twilight-model",
 ]
 
 [[package]]
