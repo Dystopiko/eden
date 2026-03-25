@@ -26,7 +26,8 @@ pub enum GatewayServerError {
 
 #[tracing::instrument(skip_all, name = "server.run")]
 pub async fn service(kernel: Arc<Kernel>) -> Result<(), Report<GatewayServerError>> {
-    let listener = TcpListener::bind(("127.0.0.1", 8080))
+    let config = &kernel.config.gateway;
+    let listener = TcpListener::bind((config.ip, config.port))
         .await
         .change_context(GatewayServerError::Bind)?;
 

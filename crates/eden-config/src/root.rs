@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use toml_edit::Document;
 
 use crate::{
-    sections::{Bot, Database, Minecraft, setup::Setup},
+    sections::{Bot, Database, Gateway, Minecraft, setup::Setup},
     validate::{Validate, ValidationContext},
 };
 
@@ -14,10 +14,16 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct Config {
     pub bot: Bot,
+
     #[serde(default)]
     pub database: Database,
+
+    #[serde(default)]
+    pub gateway: Gateway,
+
     #[serde(default)]
     pub minecraft: Minecraft,
+
     #[serde(default)]
     pub setup: Setup,
 }
