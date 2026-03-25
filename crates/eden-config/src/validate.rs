@@ -26,3 +26,12 @@ pub trait Validate {
     /// pointing at the first offending field.
     fn validate(&self, ctx: &ValidationContext<'_>) -> Result<(), Report<TomlDiagnostic>>;
 }
+
+impl<T: Validate> Validate for Option<T> {
+    fn validate(&self, ctx: &ValidationContext<'_>) -> Result<(), Report<TomlDiagnostic>> {
+        if let Some(inner) = self.as_ref() {
+            inner.validate(ctx)?;
+        }
+        Ok(())
+    }
+}

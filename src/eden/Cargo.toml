@@ -13,6 +13,7 @@ eden-core = { path = "../core" }
 eden-discord-bot = { path = "../discord-bot" }
 eden-gateway-server = { path = "../gateway-server" }
 eden-database = { workspace = true }
+eden-sentry = { workspace = true }
 eden-sqlite = { workspace = true }
 eden-utils = { workspace = true }
 
@@ -20,6 +21,7 @@ erased-report = { workspace = true }
 error-stack = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true }
+sentry = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing-subscriber = { workspace = true }

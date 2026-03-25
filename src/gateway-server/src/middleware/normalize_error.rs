@@ -41,8 +41,10 @@ pub async fn middleware(request: Request, next: Next) -> impl IntoResponse {
 
     match jsonify_plain_text_error(response, request_id).await {
         Ok(converted) => converted,
-        Err(err) => {
-            tracing::error!(error = ?err, "failed to jsonify plain-text error response");
+        Err(report) => {
+            tracing::error!(error = ?report, "failed to jsonify plain-text error response");
+            eden_sentry::capture_report(&report);
+
             ApiError::INTERNAL
                 .maybe_request_id(request_id)
                 .into_response()

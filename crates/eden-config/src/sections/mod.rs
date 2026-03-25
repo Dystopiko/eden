@@ -11,10 +11,12 @@ pub mod bot;
 pub mod database;
 pub mod gateway;
 pub mod minecraft;
+pub mod sentry;
 pub mod setup;
 
 pub use self::bot::Bot;
 pub use self::database::{Database, DatabasePool, SqliteUrl};
 pub use self::gateway::Gateway;
 pub use self::minecraft::Minecraft;
+pub use self::sentry::Sentry;
 pub use self::setup::{InitialSettings, Setup};

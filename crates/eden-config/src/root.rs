@@ -6,12 +6,12 @@ use std::path::{Path, PathBuf};
 use toml_edit::Document;
 
 use crate::{
-    sections::{Bot, Database, Gateway, Minecraft, setup::Setup},
+    sections::{Bot, Database, Gateway, Minecraft, Sentry, setup::Setup},
     validate::{Validate, ValidationContext},
 };
 
 /// The root configuration structure for Eden.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct Config {
     pub bot: Bot,
 
@@ -26,6 +26,8 @@ pub struct Config {
 
     #[serde(default)]
     pub setup: Setup,
+
+    pub sentry: Option<Sentry>,
 }
 
 impl Config {
@@ -112,6 +114,7 @@ impl Config {
     ) -> Result<(), Report<TomlDiagnostic>> {
         self.bot.validate(ctx)?;
         self.database.validate(ctx)?;
+        self.sentry.validate(ctx)?;
         Ok(())
     }
 }

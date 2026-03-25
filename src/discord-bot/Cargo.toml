@@ -10,6 +10,7 @@ repository.workspace = true
 eden-config = { workspace = true }
 eden-core = { path = "../core" }
 eden-database = { workspace = true }
+eden-sentry = { workspace = true }
 eden-sqlite = { workspace = true }
 eden-text-handling = { workspace = true }
 eden-twilight = { workspace = true }

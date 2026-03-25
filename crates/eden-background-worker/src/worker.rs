@@ -22,6 +22,10 @@ pub struct Worker<Context: Clone + Send + Sync + 'static> {
     stream: Box<dyn JobStream>,
 }
 
+#[derive(Debug, Error)]
+#[error("Failed to run next job")]
+struct RunJobError;
+
 impl<Context> Worker<Context>
 where
     Context: Clone + Send + Sync + 'static,
@@ -115,6 +119,7 @@ where
             tracing::warn!(?error, "max tries exceeded; aborting background job");
         }
 
+        eden_sentry::capture_report(&error.change_context(RunJobError));
         Ok(())
     }
 }

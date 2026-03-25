@@ -1,0 +1,26 @@
+---
+source: crates/eden-sentry/src/report.rs
+assertion_line: 95
+expression: event
+---
+{
+  "event_id": "898576392ff9451990a589f8a1ad89dd",
+  "message": "Failed to query table",
+  "timestamp": 0,
+  "exception": {
+    "values": [
+      {
+        "type": "QueryError",
+        "value": "Failed to query table"
+      },
+      {
+        "type": "Database(SqliteError { code: 1, message: \"near \\\"H\\\": syntax error\" })",
+        "value": "error returned from database: (code: 1) near \"H\": syntax error"
+      },
+      {
+        "type": "Custom",
+        "value": "(code: 1) near \"H\": syntax error"
+      }
+    ]
+  }
+}

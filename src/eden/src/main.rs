@@ -18,8 +18,8 @@ fn main() -> Result<(), ErasedReport> {
     if let Some(dotenv) = dotenv {
         tracing::debug!("using dotenv file: {}", dotenv.display());
     }
-
     let config = load_config()?;
+
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -39,13 +39,18 @@ fn main() -> Result<(), ErasedReport> {
         Ok::<_, ErasedReport>(built)
     })?;
 
+    let _sentry = eden_sentry::init(kernel.config.sentry.as_ref());
+    if _sentry.is_some() {
+        tracing::info!("Sentry integration is enabled");
+    } else {
+        tracing::info!("Sentry integration is disabled");
+    }
+
     let result: Result<(), ErasedReport> = rt.block_on(async {
         let job_context = JobContext::builder()
             .discord(kernel.http.clone())
             .kernel(kernel.clone())
             .build();
-
-        eden_database::testing::perform_migrations(kernel.pools.primary_db()).await;
 
         let workers_handle = Runner::new(job_context, kernel.pools.clone())
             .register_core_job_types()

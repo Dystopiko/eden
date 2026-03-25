@@ -46,6 +46,7 @@ pub async fn handle(ctx: &EventContext, message: Box<MessageCreate>) {
             Ok(next) => next,
             Err(error) => {
                 span.in_scope(|| tracing::warn!(?error, "failed to process trigger"));
+                eden_sentry::capture_report(&error);
                 break;
             }
         };

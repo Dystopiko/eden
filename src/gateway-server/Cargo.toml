@@ -10,6 +10,7 @@ repository.workspace = true
 eden-core = { path = "../core" }
 eden-database = { workspace = true }
 eden-gateway-api = { path = "../gateway-api", features = ["server"] }
+eden-sentry = { workspace = true }
 eden-sqlite = { workspace = true }
 eden-text-handling = { workspace = true }
 eden-twilight = { workspace = true }
@@ -24,12 +25,14 @@ futures = { workspace = true }
 hex = { workspace = true }
 mime = "0.3.17"
 rand = { workspace = true }
+sentry = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
 tower = "0.5.3"
+tower-http = { version = "0.6.8", features = ["timeout"] }
 tower-layer = "0.3.3"
 tower-service = "0.3.3"
 twilight-model = { workspace = true }

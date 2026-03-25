@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 eden-database = { workspace = true }
+eden-sentry = { workspace = true }
 eden-sqlite = { workspace = true }
 eden-utils = { workspace = true, features = ["full"] }
 

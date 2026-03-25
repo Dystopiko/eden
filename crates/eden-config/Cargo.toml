@@ -15,6 +15,7 @@ eden-validation = { workspace = true }
 constant_time_eq = "0.4.2"
 error-stack = { workspace = true }
 serde = { workspace = true }
+sentry-core = "0.47.0"
 thiserror = { workspace = true }
 toml_edit = { workspace = true }
 twilight-model = { workspace = true }

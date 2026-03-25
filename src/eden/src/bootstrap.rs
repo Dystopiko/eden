@@ -11,7 +11,14 @@ pub fn init_tracing() {
         .without_time()
         .with_filter(env_filter);
 
-    tracing_subscriber::registry().with(fmt_layer).init();
+    let sentry_layer = sentry::integrations::tracing::layer()
+        .enable_span_attributes()
+        .with_filter(LevelFilter::INFO);
+
+    tracing_subscriber::registry()
+        .with(fmt_layer)
+        .with(sentry_layer)
+        .init();
 }
 
 /// Waits for an OS-level shutdown signal and returns the signal name

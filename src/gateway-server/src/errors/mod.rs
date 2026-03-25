@@ -207,6 +207,8 @@ pub fn classify(report: ErasedReport) -> ApiError {
     }
 
     tracing::error!(error = ?report, "unhandled error while processing request");
+    eden_sentry::capture_report(&report);
+
     ApiError::INTERNAL
 }
 
@@ -222,9 +224,11 @@ fn classify_rate_limit_error(report: &ErasedReport) -> Option<ApiError> {
 }
 
 fn classify_db(report: &ErasedReport) -> Option<ApiError> {
+    let mut error = None;
+
     if let Some(kind) = report.sql_error_type() {
-        return Some(match kind {
-            SqlErrorType::RowNotFound => ApiError::NOT_FOUND,
+        error = Some(match kind {
+            SqlErrorType::RowNotFound => return Some(ApiError::NOT_FOUND),
             SqlErrorType::Readonly => ApiError::READONLY_MODE,
             SqlErrorType::UnhealthyConnection => ApiError::SERVICE_UNAVAILABLE,
             SqlErrorType::Unknown => {
@@ -235,8 +239,10 @@ fn classify_db(report: &ErasedReport) -> Option<ApiError> {
         });
     }
 
-    if let Some(pool_error) = report.downcast_ref::<PoolError>() {
-        return Some(match pool_error {
+    if let Some(pool_error) = report.downcast_ref::<PoolError>()
+        && error.is_none()
+    {
+        error = Some(match pool_error {
             PoolError::General => {
                 tracing::error!(error = ?report, "encountered a pool error");
                 ApiError::INTERNAL
@@ -245,7 +251,10 @@ fn classify_db(report: &ErasedReport) -> Option<ApiError> {
         });
     }
 
-    None
+    if error.is_some() {
+        eden_sentry::capture_report(report);
+    }
+    error
 }
 
 #[cfg(test)]
