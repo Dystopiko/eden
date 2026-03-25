@@ -224,6 +224,7 @@ fn classify_rate_limit_error(report: &ErasedReport) -> Option<ApiError> {
 fn classify_db(report: &ErasedReport) -> Option<ApiError> {
     if let Some(kind) = report.sql_error_type() {
         return Some(match kind {
+            SqlErrorType::RowNotFound => ApiError::NOT_FOUND,
             SqlErrorType::Readonly => ApiError::READONLY_MODE,
             SqlErrorType::UnhealthyConnection => ApiError::SERVICE_UNAVAILABLE,
             SqlErrorType::Unknown => {

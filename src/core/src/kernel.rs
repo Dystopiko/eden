@@ -19,6 +19,9 @@ pub struct Kernel {
     #[builder(default = default_in_memory_cache())]
     pub discord_cache: Arc<InMemoryCache>,
 
+    /// Discord's Rest API client
+    pub http: Arc<twilight_http::Client>,
+
     /// Database connection pool connected to either primary or
     /// primary+replica databases
     pub pools: DatabasePools,
@@ -141,7 +144,8 @@ fn default_in_memory_cache() -> Arc<InMemoryCache> {
     let wants = ResourceType::GUILD
         | ResourceType::MEMBER
         | ResourceType::ROLE
-        | ResourceType::USER_CURRENT;
+        | ResourceType::USER_CURRENT
+        | ResourceType::USER;
 
     Arc::new(InMemoryCache::builder().resource_types(wants).build())
 }

@@ -36,6 +36,22 @@ impl McAccount {
         .change_context(McAccountQueryError)
         .attach("while trying to find minecraft account by uuid")
     }
+
+    pub async fn get_all(
+        conn: &mut eden_sqlite::Connection,
+        discord_user_id: Id<UserMarker>,
+    ) -> Result<Vec<Self>, Report<McAccountQueryError>> {
+        sqlx::query_as::<_, McAccount>(
+            r#"
+            SELECT * FROM minecraft_accounts
+            WHERE discord_user_id = ?"#,
+        )
+        .bind(Snowflake::new(discord_user_id.cast()))
+        .fetch_all(conn)
+        .await
+        .change_context(McAccountQueryError)
+        .attach("while trying to fetching all minecraft accounts from a member")
+    }
 }
 
 impl McAccount {

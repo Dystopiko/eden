@@ -20,6 +20,7 @@ chrono = { workspace = true }
 dashmap = { workspace = true }
 erased-report = { workspace = true }
 error-stack = { workspace = true }
+futures = { workspace = true }
 hex = { workspace = true }
 mime = "0.3.17"
 rand = { workspace = true }

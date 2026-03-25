@@ -161,6 +161,8 @@ pub enum LimitedAction {
     RequestSession { guest: bool },
     ValidateSessions,
     LinkMinecraftAccount,
+    // This needs to fetch member data from Discord API
+    RegisterMember,
 }
 
 impl LimitedAction {
@@ -172,6 +174,7 @@ impl LimitedAction {
             Self::LinkMinecraftAccount => {
                 "You have requested to link your Minecraft account too quickly! Please try again later."
             }
+            Self::RegisterMember => "You have registered members too quickly!",
         }
     }
 
@@ -203,6 +206,12 @@ impl LimitedAction {
             Self::LinkMinecraftAccount => BucketConfig {
                 max_global_requests: 15,
                 max_requests: 3,
+                reset_interval: Duration::from_mins(1),
+            },
+
+            Self::RegisterMember => BucketConfig {
+                max_global_requests: 10,
+                max_requests: 5,
                 reset_interval: Duration::from_mins(1),
             },
         }

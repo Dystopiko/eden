@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use eden_database::settings::UpsertSettings;
-use eden_gateway_api::settings::{EncodedSettings, PatchSettings};
+use eden_gateway_api::{admin::settings::PatchSettings, settings::EncodedSettings};
 use erased_report::ErasedReport;
 
 use crate::{controllers::ApiResult, extract::Kernel};

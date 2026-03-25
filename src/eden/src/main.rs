@@ -26,9 +26,13 @@ fn main() -> Result<(), ErasedReport> {
         .unwrap();
 
     let kernel = rt.block_on(async {
+        let token = config.bot.token.as_str().to_string();
+        let http = Arc::new(twilight_http::Client::builder().token(token).build());
+
         let built = Kernel::builder()
             .pools_from_config(&config.database)?
             .config(Arc::new(config))
+            .http(http)
             .shutdown_signal(ShutdownSignal::new())
             .build();
 
@@ -36,11 +40,8 @@ fn main() -> Result<(), ErasedReport> {
     })?;
 
     let result: Result<(), ErasedReport> = rt.block_on(async {
-        let token = kernel.config.bot.token.as_str().to_string();
-        let http = Arc::new(twilight_http::Client::builder().token(token).build());
-
         let job_context = JobContext::builder()
-            .discord(http.clone())
+            .discord(kernel.http.clone())
             .kernel(kernel.clone())
             .build();
 
@@ -52,7 +53,7 @@ fn main() -> Result<(), ErasedReport> {
             .start();
 
         let discord = if kernel.config.bot.enabled {
-            eden_discord_bot::service(kernel.clone(), http.clone())
+            eden_discord_bot::service(kernel.clone(), kernel.http.clone())
                 .map_err(|report| ErasedReport::from_report(report))
                 .boxed()
         } else {

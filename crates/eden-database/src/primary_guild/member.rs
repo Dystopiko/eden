@@ -1,7 +1,8 @@
 use bon::Builder;
 use error_stack::{Report, ResultExt};
+use futures::{Stream, TryStreamExt, stream::MapErr};
 use sqlx::FromRow;
-use std::str::FromStr;
+use std::{pin::Pin, str::FromStr};
 use thiserror::Error;
 use twilight_model::{
     guild::Member as GuildMember,
@@ -20,7 +21,30 @@ pub struct Member {
     pub invited_by: Option<Snowflake>,
 }
 
+type InviteesStream<'a> = MapErr<
+    Pin<Box<dyn Stream<Item = Result<Member, sqlx::Error>> + Send + 'a>>,
+    fn(sqlx::Error) -> Report<MemberQueryError>,
+>;
+
 impl Member {
+    pub fn fetch_invitees(
+        conn: &mut eden_sqlite::Connection,
+        id: Id<UserMarker>,
+    ) -> InviteesStream<'_> {
+        sqlx::query_as::<_, Member>(
+            r#"
+            SELECT * FROM members
+            WHERE invited_by = ?"#,
+        )
+        .bind(Snowflake::new(id.cast()))
+        .fetch(conn)
+        .map_err(|error| {
+            Report::new(error)
+                .change_context(MemberQueryError)
+                .attach("while trying to fetch all invitees by inviter's user id")
+        })
+    }
+
     pub async fn find_by_discord_user_id(
         conn: &mut eden_sqlite::Connection,
         id: Id<UserMarker>,

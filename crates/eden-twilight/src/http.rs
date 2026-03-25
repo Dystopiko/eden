@@ -47,6 +47,10 @@ impl HttpRequestError {
                 error: ApiError::General(error),
                 ..
             } if error.code == MISSING_PERMISSIONS_CODE => HttpFailReason::MissingPermissions,
+            TwilightErrorType::Response {
+                error: ApiError::General(error),
+                ..
+            } => HttpFailReason::Response(error.code),
             TwilightErrorType::RequestError => HttpFailReason::Connection,
             _ => HttpFailReason::Unknown,
         }
@@ -59,6 +63,7 @@ pub enum HttpFailReason {
     Connection,
     Deserialize,
     MissingPermissions,
+    Response(u64),
     TimedOut,
     Unauthorized,
     ServiceUnavailable,

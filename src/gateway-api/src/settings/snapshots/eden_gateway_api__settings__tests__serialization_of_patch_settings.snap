@@ -1,7 +1,0 @@
----
-source: src/gateway-api/src/settings/mod.rs
-expression: patch
----
-{
-  "allow_guests": true
-}

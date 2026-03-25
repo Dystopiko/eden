@@ -11,6 +11,16 @@ pub fn build(kernel: Arc<Kernel>, ratelimiter: Arc<RateLimiter>) -> Router<()> {
     let router = Router::new()
         .route("/", get(index))
         .route(
+            "/admin/members/{id}/invitees",
+            get(admin::members::invitees::invitees),
+        )
+        .route(
+            "/admin/members/{id}",
+            get(admin::members::get)
+                .patch(admin::members::patch)
+                .post(admin::members::post),
+        )
+        .route(
             "/admin/settings",
             get(admin::settings::get).patch(admin::settings::patch),
         )
