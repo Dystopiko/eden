@@ -5,6 +5,14 @@ use crate::is_maybe_word;
 
 pub use rustrict::Type as RustrictType;
 
+#[allow(unsafe_code, clippy::missing_safety_doc)]
+pub unsafe fn add_bad_words(words: &[String]) {
+    let trie = unsafe { rustrict::Trie::customize_default() };
+    for word in words {
+        trie.set(word, RustrictType::ANY);
+    }
+}
+
 /// Returns a string that may be censored by iterating over words and check whether
 /// each word is considered as profane based on the censor configuration provided
 /// by `modifier`.

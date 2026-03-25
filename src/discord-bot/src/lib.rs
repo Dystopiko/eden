@@ -41,6 +41,13 @@ pub async fn service(
     kernel: Arc<Kernel>,
     http: Arc<twilight_http::Client>,
 ) -> Result<(), Report<ServiceError>> {
+    // SAFETY: This line will not interfere with the function since we haven't
+    //         launched all of our required shards yet.
+    #[allow(unsafe_code)]
+    unsafe {
+        eden_text_handling::swearing::add_bad_words(&kernel.config.bot.primary_guild.bad_words);
+    }
+
     let mut config = ShardConfig::new(
         kernel.config.bot.token.as_str().to_string(),
         INTENTS,

@@ -12,4 +12,8 @@ pub struct PrimaryGuild {
 
     #[serde(default)]
     pub chaosneco_user_ids: Vec<Id<UserMarker>>,
+
+    // Additional bad words
+    #[serde(default)]
+    pub bad_words: Vec<String>,
 }
