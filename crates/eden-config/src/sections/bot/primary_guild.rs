@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use twilight_model::id::Id;
-use twilight_model::id::marker::{ChannelMarker, GuildMarker, RoleMarker};
+use twilight_model::id::marker::{ChannelMarker, GuildMarker, RoleMarker, UserMarker};
 
 /// Configuration for the primary guild for Eden.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -9,4 +9,7 @@ pub struct PrimaryGuild {
     pub alert_channel_id: Option<Id<ChannelMarker>>,
     pub contributor_role_id: Id<RoleMarker>,
     pub member_role_id: Id<RoleMarker>,
+
+    #[serde(default)]
+    pub chaosneco_user_ids: Vec<Id<UserMarker>>,
 }

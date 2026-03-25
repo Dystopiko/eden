@@ -21,6 +21,8 @@ erased-report = { workspace = true }
 error-stack = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
+num-format = "0.4.4"
+rand = { workspace = true }
 sha2 = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
