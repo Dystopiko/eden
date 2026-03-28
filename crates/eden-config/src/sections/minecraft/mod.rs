@@ -52,7 +52,8 @@ impl<'de> serde::de::Visitor<'de> for UuidOrUsernameVisitor {
     {
         if let Ok(uuid) = Hyphenated::from_str(v) {
             Ok(UuidOrUsername::Uuid(uuid.into_uuid()))
-        } else if validate_username(v).is_ok() {
+        } else if validate_username(v, false).is_ok() {
+            // TODO: Maybe add support for Bedrock usernames?
             Ok(UuidOrUsername::Username(v.to_string()))
         } else {
             Err(serde::de::Error::custom(

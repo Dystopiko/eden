@@ -18,27 +18,11 @@ pub enum Executor {
     Player(ExecutorPlayerInfo),
 }
 
-#[cfg(feature = "server")]
-impl validator::Validate for Executor {
-    fn validate(&self) -> Result<(), validator::ValidationErrors> {
-        match self {
-            Self::Console => Ok(()),
-            Self::Player(player) => player.validate(),
-        }
-    }
-}
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "server", derive(validator::Validate))]
 pub struct ExecutorPlayerInfo {
     pub dimension: Dimension,
     pub gamemode: GameType,
     pub position: BlockPos,
-
-    #[cfg_attr(
-        feature = "server",
-        validate(custom(function = eden_validation::minecraft::validate_username))
-    )]
     pub username: String,
     pub uuid: Uuid,
 }

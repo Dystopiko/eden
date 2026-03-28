@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use eden_core::jobs::admin_command::AdminCommandAlertJob;
-use eden_gateway_api::alerts::admin_commands::AdminCommandAlert as Form;
+use eden_gateway_api::alerts::admin_commands::{AdminCommandAlert as Form, Executor};
 
 use crate::{
     controllers::ApiResult,

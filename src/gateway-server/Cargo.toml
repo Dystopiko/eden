@@ -15,6 +15,7 @@ eden-sqlite = { workspace = true }
 eden-text-handling = { workspace = true }
 eden-twilight = { workspace = true }
 eden-utils = { workspace = true }
+eden-validation = { workspace = true }
 
 axum-extra = { version = "0.12.5", features = ["typed-header"] }
 chrono = { workspace = true }

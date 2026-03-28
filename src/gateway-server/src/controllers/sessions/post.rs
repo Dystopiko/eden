@@ -20,7 +20,7 @@ use uuid::Uuid;
 use crate::{
     controllers::ApiResult,
     errors::{ApiError, ErrorCode},
-    extract::{Kernel, Validated},
+    extract::Kernel,
     middleware::trace_request::RequestLogs,
     ratelimiter::{Actor, LimitedAction, RateLimiter},
 };
@@ -29,7 +29,7 @@ pub async fn post(
     Kernel(kernel): Kernel,
     Extension(rate_limiter): Extension<Arc<RateLimiter>>,
     Extension(logs): Extension<RequestLogs>,
-    Validated(body): Validated<Json<RequestSession>>,
+    Json(body): Json<RequestSession>,
 ) -> ApiResult<Response> {
     let mut conn = kernel.pools.db_read_prefer_primary().await?;
     let session = grant_session(&kernel, &mut conn, &body, &logs).await?;

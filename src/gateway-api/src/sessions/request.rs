@@ -6,7 +6,6 @@ use uuid::Uuid;
 use crate::members::EncodedMember;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "server", derive(validator::Validate))]
 pub struct RequestSession {
     pub uuid: Uuid,
     pub ip: IpAddr,

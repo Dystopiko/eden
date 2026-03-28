@@ -7,6 +7,7 @@ use eden_database::primary_guild::{McAccount, McAccountChallenge};
 use eden_gateway_api::members::link::minecraft::{LinkChallenge, LinkMcAccount};
 use eden_sqlite::error::QueryResultExt;
 use eden_text_handling::generator::random_words;
+use eden_validation::minecraft::validate_username;
 use erased_report::ErasedReport;
 use error_stack::ResultExt;
 use sha2::Digest;
@@ -18,7 +19,7 @@ use crate::{
     ApiError,
     controllers::ApiResult,
     errors::ErrorCode,
-    extract::{Kernel, Validated},
+    extract::Kernel,
     middleware::trace_request::RequestLogs,
     ratelimiter::{Actor, LimitedAction, RateLimiter},
 };
@@ -30,8 +31,10 @@ pub async fn minecraft(
     Kernel(kernel): Kernel,
     Extension(rate_limiter): Extension<Arc<RateLimiter>>,
     Extension(logs): Extension<RequestLogs>,
-    Validated(body): Validated<Json<LinkMcAccount>>,
+    Json(body): Json<LinkMcAccount>,
 ) -> ApiResult<Response> {
+    validate_username(&body.username, !body.java)?;
+
     let rl_actor = Actor::Ip(body.ip);
     logs.add("ratelimit.actor", format!("{rl_actor:?}"));
 
