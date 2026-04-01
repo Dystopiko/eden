@@ -39,7 +39,7 @@ pub fn validate_username(name: &str, bedrock: bool) -> Result<(), Report<Invalid
         };
     }
 
-    if (MIN_CHARS..=MAX_CHARS).contains(&name.len()) {
+    if !(MIN_CHARS..=MAX_CHARS).contains(&name.len()) {
         default_err!()
     }
 
