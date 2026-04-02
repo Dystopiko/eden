@@ -19,8 +19,8 @@ fn main() -> Result<(), ErasedReport> {
     if let Some(dotenv) = dotenv {
         tracing::debug!("using dotenv file: {}", dotenv.display());
     }
-    let config = load_config()?;
 
+    let config = load_config()?;
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -39,6 +39,11 @@ fn main() -> Result<(), ErasedReport> {
 
         Ok::<_, ErasedReport>(built)
     })?;
+
+    // Perform database migrations for the primary pool only.
+    rt.block_on(eden_database::migrations::perform(
+        kernel.pools.primary_db(),
+    ))?;
 
     let _sentry = eden_sentry::init(kernel.config.sentry.as_ref());
     if _sentry.is_some() {

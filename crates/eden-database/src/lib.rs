@@ -1,4 +1,5 @@
 pub mod background_job;
+pub mod migrations;
 pub mod pools;
 pub mod primary_guild;
 pub mod settings;
