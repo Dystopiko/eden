@@ -1,9 +1,0 @@
----
-source: src/gateway-api/src/minecraft/block_pos.rs
-expression: "&pos"
----
-[
-  0,
-  0,
-  0
-]

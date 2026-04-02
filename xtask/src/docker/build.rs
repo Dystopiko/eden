@@ -1,6 +1,6 @@
 use erased_report::ErasedReport;
 use error_stack::ResultExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use xshell::{Shell, cmd};
 
 use crate::{docker, flags};
@@ -26,10 +26,7 @@ impl flags::Build {
         log::debug!("docker.path = {}", docker_exec.display());
         log::debug!("workspace.path = {}", workspace_dir.display());
 
-        let _handle = setup_stub_crates(sh, &workspace_dir)?;
-        build_image(sh, &workspace_dir, &image, profile)?;
-
-        Ok(())
+        build_image(sh, &workspace_dir, &image, profile)
     }
 }
 
@@ -53,67 +50,4 @@ fn build_image(
 
     log::info!("Docker image {image:?} built successfully");
     Ok(())
-}
-
-struct StubCratesHandle<'a> {
-    path: PathBuf,
-    sh: &'a Shell,
-}
-
-/// This function attempts to mirror the structure of the entire `crates` directory
-/// by making all of the crates in the directory to have no actual content but only the
-/// necessary to be compiled successfully, so Docker can cache dependencies without
-/// invalidating it whenever source changes (except for any changes made to the Cargo manifest files).
-fn setup_stub_crates<'s>(
-    sh: &'s Shell,
-    workspace_dir: &Path,
-) -> Result<StubCratesHandle<'s>, ErasedReport> {
-    let stub_crates_dir = workspace_dir.join("stub-crates");
-    let crates_dir = workspace_dir.join("crates");
-    log::info!("Setting up stub crates directory for Docker layer caching...");
-
-    if stub_crates_dir.exists() {
-        sh.remove_path(&stub_crates_dir)
-            .attach("failed to remove stale stub-crates directory")?;
-    }
-
-    sh.create_dir(&stub_crates_dir)
-        .attach("failed to create stub-crates directory")?;
-
-    let entries = sh
-        .read_dir(&crates_dir)
-        .attach("failed to read crates directory")?;
-
-    sh.change_dir(&stub_crates_dir);
-
-    for entry in entries {
-        let crate_name = entry
-            .file_name()
-            .expect("should provide file name in every directory entry");
-
-        let stub_crate_dir = stub_crates_dir.join(crate_name);
-        sh.create_dir(&stub_crate_dir)
-            .attach_with(|| format!("failed to create stub crate directory for {crate_name:?}"))?;
-
-        // Copy the real Cargo.toml so dependency metadata is preserved for
-        // Docker's cache layer, but stub out the source so there's nothing
-        // meaningful to compile beyond an empty library root.
-        sh.copy_file(entry.join("Cargo.toml"), stub_crate_dir.join("Cargo.toml"))
-            .attach_with(|| format!("failed to copy Cargo.toml for {crate_name:?}"))?;
-
-        sh.write_file(stub_crate_dir.join("src").join("lib.rs"), "")
-            .attach_with(|| format!("failed to write stub lib.rs for {crate_name:?}"))?;
-    }
-
-    Ok(StubCratesHandle {
-        path: stub_crates_dir,
-        sh,
-    })
-}
-
-impl Drop for StubCratesHandle<'_> {
-    fn drop(&mut self) {
-        _ = self.sh.remove_path(&self.path);
-        log::info!("Deleted stub crates directory");
-    }
 }

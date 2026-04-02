@@ -1,9 +1,0 @@
----
-source: src/gateway-api/src/sessions/request.rs
-expression: alert
----
-{
-  "uuid": "00000000-0000-0000-0000-000000000000",
-  "ip": "127.0.0.1",
-  "java": true
-}
