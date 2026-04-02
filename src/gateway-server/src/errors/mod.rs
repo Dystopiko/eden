@@ -55,6 +55,8 @@ pub enum ErrorCode {
     ServiceUnavailable,
     /// Maps to `429 Too Many Requests`
     RateLimited,
+    /// Maps to `401 Unauthorized`.
+    Unauthorized,
     /// Maps to `403 Forbidden`
     Forbidden,
 }
@@ -65,6 +67,8 @@ impl ApiError {
         "An unexpected error occurred while handling your request. \
           Please try again later, or contact a server administrator if the issue persists.",
     );
+
+    pub const ACCESS_DENIED: Self = Self::from_static(ErrorCode::Unauthorized, "Access denied");
 
     pub const NOT_FOUND: Self = Self::from_static(
         ErrorCode::NotFound,
@@ -178,6 +182,7 @@ where
 impl From<ErrorCode> for StatusCode {
     fn from(code: ErrorCode) -> Self {
         match code {
+            ErrorCode::Unauthorized => StatusCode::UNAUTHORIZED,
             ErrorCode::Internal => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorCode::ReadonlyMode | ErrorCode::ServiceUnavailable => {
                 StatusCode::SERVICE_UNAVAILABLE

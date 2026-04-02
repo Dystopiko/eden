@@ -8,6 +8,7 @@ use eden_utils::signals::ShutdownSignal;
 use erased_report::ErasedReport;
 use error_stack::{Report, ResultExt};
 use futures::{FutureExt, TryFutureExt};
+use rand::seq::IteratorRandom;
 use std::{path::Path, sync::Arc};
 
 fn main() -> Result<(), ErasedReport> {
@@ -109,8 +110,49 @@ fn load_config() -> Result<Config, Report<ConfigLoadError>> {
         std::process::exit(1);
     };
 
-    let config = EditableConfig::open(path)?;
-    tracing::debug!(config = ?&*config, "using config file: {}", config.path().display());
+    let mut config = EditableConfig::open(path)?;
 
+    // Generate shared secret token if needed.
+    if config.gateway.shared_secret_token.as_str().is_empty() {
+        tracing::warn!(
+            "gateway.shared_secret_token is empty. Generating new one (this will invalidate the previous token)..."
+        );
+
+        config
+            .edit(|_, document| {
+                if let Some(gateway) = document
+                    .entry("gateway")
+                    .or_insert(toml_edit::table())
+                    .as_table_like_mut()
+                {
+                    gateway
+                        .entry("shared_secret_token")
+                        .or_insert_with(|| toml_edit::value(generate_shared_token()));
+                }
+            })
+            .change_context(ConfigLoadError)?;
+    }
+
+    tracing::debug!(config = ?&*config, "using config file: {}", config.path().display());
     Ok(config.into_inner())
+}
+
+const GENERATED_TOKEN_LENGTH: usize = 64;
+static TOKEN_CHARS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz_-";
+
+fn generate_shared_token() -> String {
+    let mut rng = rand::rng();
+    let mut token = String::with_capacity(GENERATED_TOKEN_LENGTH);
+
+    let chars = TOKEN_CHARS.chars();
+    for _ in 0..GENERATED_TOKEN_LENGTH {
+        let c = chars
+            .clone()
+            .choose(&mut rng)
+            .expect("should generate a random letter");
+
+        token.push(c);
+    }
+
+    token
 }

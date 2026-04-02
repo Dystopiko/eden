@@ -38,7 +38,7 @@ pub fn build(kernel: Arc<Kernel>, ratelimiter: Arc<RateLimiter>) -> Router<()> {
             Method::HEAD => StatusCode::NOT_FOUND.into_response(),
             _ => Json(ApiError::NOT_FOUND).into_response(),
         })
-        .with_state(kernel);
+        .with_state(kernel.clone());
 
-    crate::middleware::apply(router)
+    crate::middleware::apply(kernel, router)
 }
