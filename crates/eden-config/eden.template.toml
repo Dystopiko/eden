@@ -1,5 +1,134 @@
+# Enable or disable Prometheus metrics collection.
+#
+# When enabled, metrics are exposed at the `/metrics` endpoint.
+#
+# Available metrics:
+#   - database_idle_conns                 — Number of idle database connections
+#   - database_used_conns                 — Number of active database connections
+#   - database_time_to_acquire_connection — Time spent waiting for a connection
+#   - events_processed                    — Total Discord gateway events processed
+#   - requests_total                      — Total HTTP requests received
+#   - response_times                      — HTTP response time distribution
+#   - shard_latencies                     — Per-shard gateway latency
+#   - sessions_granted                    — Total sessions granted to players
+prometheus = true
+
 [bot]
+# The Discord application ID for this bot.
+#
+# Eden will infer this automatically from the provided token,
+# so this field is optional in most cases.
+#
+# If the actual application ID turns out to be different from what
+# it is configured, Eden will throw a `application ID mismatch` warning.
+application_id = "1"
+
+# Enable or disable the Discord bot.
+#
+# If disabled, the bot will not process incoming Minecraft account
+# verification challenges or member messages, which also disables
+# auto-response features.
+enabled = true
+
+# Your Discord bot token.
+# Keep this secret — never share or commit this value.
 token = "<INSERT TOKEN HERE>"
 
 [bot.primary_guild]
+# The ID of the primary Discord guild this bot operates in.
+#
+# This field is required.
 id = "<INSERT PRIMARY GUILD ID HERE>"
+
+# Channel ID where the bot will send Minecraft-related alerts.
+alert_channel_id = "<INSERT HERE>"
+
+# Role ID for contributors.
+# Used to identify and automatically register contributors into the database.
+contributor_role_id = "<INSERT HERE>"
+
+# Role ID for members.
+# Used to identify and automatically register members into the database.
+member_role_id = "<INSERT HERE>"
+
+# List of Discord user IDs associated with chaosneco.
+# Users in this list will trigger a crying emoticon auto-response.
+chaosneco_user_ids = []
+
+# Additional words for the bot's profanity filter.
+# Accepts words in any language that uses the Latin alphabet.
+bad_words = []
+
+# Primary database pool handles most reads and writes,
+# always operating on the latest data revision.
+[database.primary]
+# SQLite connection URL for the primary database. Required.
+# url = ""
+
+# Minimum number of connections to keep open.
+# min_connections = 3
+
+# Maximum number of connections allowed.
+# max_connections = 3
+
+# Set to true to make this pool read-only. Not recommended for the primary pool.
+# readonly = false
+
+# Configuration for replica database. This pool should be optimized for read-heavy workloads.
+[database.replica]
+# SQLite connection URL for the replica database. Required.
+# url = ""
+
+# Minimum number of connections to keep open.
+# min_connections = 3
+
+# Maximum number of connections allowed.
+# max_connections = 3
+
+# Replicas are read-only by design.
+#
+# It is strongly recommended to keep this enabled.
+readonly = true
+
+# Gateway API server configuration.
+#
+# This is the HTTP server that Minecraft server clients communicate with.
+[gateway]
+ip = "127.0.0.1"
+port = 7590
+
+# Shared secret used to authenticate requests between Eden and the EdenMC mod.
+#
+# If left blank, Eden generates and manages this value automatically.
+# Changing it manually will break existing client connections.
+shared_secret_token = ""
+
+# Minecraft permission management.
+#
+# Define LuckPerms permission nodes to be automatically granted to players
+# based on their role. Supports role-based and player-specific targeting.
+#
+# Role-based examples:
+#   contributors = ["veinminer"]
+#   member       = ["dystopia.instantrestock"]
+#   staff        = []
+#
+# Player-specific examples (by username or UUID):
+#   notch                                    = ["deadchest"]
+#   "a1705729-8729-3a49-befe-0ee68d88a374"   = ["veinminer"]
+[minecraft]
+
+# First-run setup defaults applied when Eden initializes for the first time.
+[setup]
+
+# Initial settings to be set by default for new primary guilds
+[setup.settings]
+# Whether to allow guests to join and interact in the Minecraft server,
+# players who are not registered members of the organization.
+allow_guests = true
+
+# Sentry error tracking integration (optional).
+# [sentry]
+# dsn = ""
+# environment = "release"
+# traces_sample_rate = 1.0
