@@ -32,7 +32,6 @@ fn main() -> Result<(), ErasedReport> {
         let http = Arc::new(twilight_http::Client::builder().token(token).build());
         let metrics = config
             .prometheus
-            .is_some()
             .then(|| InstanceMetrics::new().expect("should build instance metrics successfully"));
 
         tracing::info!(
