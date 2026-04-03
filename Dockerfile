@@ -62,7 +62,7 @@ WORKDIR /app
 RUN apt update && apt install -y ca-certificates libcurl4
 
 COPY --from=compile --chmod=0755 /tmp/bin/eden /app
-COPY --from=compile ${BUILD_DIR}/crates/** /app
+COPY --from=compile ${BUILD_DIR}/crates /app/crates
 
 USER ${USER}
 
