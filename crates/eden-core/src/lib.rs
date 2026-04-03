@@ -3,3 +3,4 @@ pub mod jobs;
 pub mod kernel;
 
 pub use self::kernel::Kernel;
+pub use eden_prometheus::InstanceMetrics;

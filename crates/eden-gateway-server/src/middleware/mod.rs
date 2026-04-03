@@ -8,6 +8,7 @@ use sentry::integrations::tower::{NewSentryLayer, SentryHttpLayer};
 use std::{sync::Arc, time::Duration};
 use tower_http::timeout::{RequestBodyTimeoutLayer, TimeoutLayer};
 
+pub mod collect_metrics;
 pub mod extract_client_ip;
 pub mod normalize_error;
 pub mod requires_auth;
@@ -21,8 +22,12 @@ pub fn apply(kernel: Arc<Kernel>, router: Router<()>) -> Router<()> {
     let middleware = tower::ServiceBuilder::new()
         .layer(from_fn(extract_client_ip::middleware))
         .layer(from_fn(trace_request::middleware))
-        .layer(from_fn_with_state(kernel, requires_auth::middleware))
-        .layer(from_fn(normalize_error::middleware));
+        .layer(from_fn_with_state(
+            kernel.clone(),
+            requires_auth::middleware,
+        ))
+        .layer(from_fn(normalize_error::middleware))
+        .layer(from_fn_with_state(kernel, collect_metrics::middleware));
 
     router
         .layer(middleware)

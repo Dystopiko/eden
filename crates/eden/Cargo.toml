@@ -13,6 +13,7 @@ eden-core = { path = "../eden-core" }
 eden-discord-bot = { path = "../eden-discord-bot" }
 eden-gateway-server = { path = "../eden-gateway-server" }
 eden-database = { workspace = true }
+eden-prometheus = { path = "../eden-prometheus" }
 eden-sentry = { workspace = true }
 eden-sqlite = { workspace = true }
 eden-utils = { workspace = true }

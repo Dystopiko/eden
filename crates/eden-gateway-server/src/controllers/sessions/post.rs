@@ -3,7 +3,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use eden_core::jobs::OnPlayerJoined;
+use eden_core::{InstanceMetrics, jobs::OnPlayerJoined};
 use eden_database::{
     Timestamp,
     primary_guild::{LoggedInEvent, McAccountType, logged_in_event::NewLoggedInEvent},
@@ -43,6 +43,10 @@ pub async fn post(
     logs.add("ratelimit.actor", format!("{rl_actor:?}"));
 
     let rl_headers = rate_limiter.permit(rl_actor, rl_action)?.into_headers();
+    if let Some(metrics) = kernel.metrics.as_ref() {
+        session.update_stats(metrics);
+    }
+
     let event = session.new_logged_in_event();
     let response = session.response();
 
@@ -211,5 +215,17 @@ impl Session {
             member,
             perks,
         }
+    }
+
+    fn update_stats(&self, metrics: &InstanceMetrics) {
+        let label = match &self.view {
+            GuestOrMember::Guest { .. } => "guests",
+            GuestOrMember::Member { .. } => "members",
+        };
+        metrics
+            .sessions_granted
+            .get_metric_with_label_values(&[label])
+            .expect("should only require one label")
+            .inc();
     }
 }

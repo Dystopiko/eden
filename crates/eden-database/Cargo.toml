@@ -9,6 +9,7 @@ repository.workspace = true
 
 [dependencies]
 eden-config = { workspace = true }
+eden-prometheus = { path = "../eden-prometheus" }
 eden-sqlite = { workspace = true }
 eden-timestamp = { workspace = true, features = ["full"] }
 

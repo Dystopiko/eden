@@ -1,4 +1,7 @@
+use std::time::Instant;
+
 use bon::Builder;
+use eden_prometheus::InstanceMetrics;
 use eden_sqlite::error::PoolError;
 use eden_sqlite::{PooledConnection, Transaction};
 use error_stack::Report;
@@ -7,6 +10,7 @@ use error_stack::Report;
 pub struct DatabasePools {
     primary_db: eden_sqlite::Pool,
     replica_db: Option<eden_sqlite::Pool>,
+    metrics: Option<InstanceMetrics>,
 }
 
 impl DatabasePools {
@@ -36,7 +40,19 @@ impl DatabasePools {
     #[tracing::instrument(skip_all, name = "db.write")]
     pub async fn db_write(&self) -> Result<Transaction<'static>, Report<PoolError>> {
         tracing::debug!("obtaining primary database connection...");
-        self.primary_db().begin().await
+
+        let start = Instant::now();
+        let conn = self.primary_db().begin().await;
+
+        if let Some(metrics) = self.metrics.as_ref() {
+            metrics
+                .database_time_to_acquire_connection
+                .get_metric_with_label_values(&["primary"])
+                .expect("should only require one label")
+                .observe(start.elapsed().as_secs_f64());
+        }
+
+        conn
     }
 
     /// Acquires a read connection, preferring the replica database if available.
@@ -54,11 +70,13 @@ impl DatabasePools {
         let replica_db = self.replica_db();
         let Some(replica) = replica_db.as_ref() else {
             tracing::debug!("obtaining primary database connection...");
-            return self.primary_db().acquire().await;
+            return self.acquire_from_primary().await;
         };
 
         tracing::debug!("obtaining replica database connection...");
-        match replica.acquire().await {
+
+        let start = Instant::now();
+        let result = match replica.acquire().await {
             Ok(conn) => Ok(conn),
             Err(error) => match error.current_context() {
                 PoolError::Unhealthy => {
@@ -66,11 +84,21 @@ impl DatabasePools {
                         ?error,
                         "replica database is unhealthy, falling back to primary"
                     );
-                    self.primary_db().acquire().await
+                    self.acquire_from_primary().await
                 }
                 _ => Err(error),
             },
+        };
+
+        if let Some(metrics) = self.metrics.as_ref() {
+            metrics
+                .database_time_to_acquire_connection
+                .get_metric_with_label_values(&["replica"])
+                .expect("should only require one label")
+                .observe(start.elapsed().as_secs_f64());
         }
+
+        result
     }
 
     /// Acquires a read connection, preferring the primary database over the replica.
@@ -89,20 +117,49 @@ impl DatabasePools {
     #[tracing::instrument(skip_all, name = "db.read_prefer_primary")]
     pub async fn db_read_prefer_primary(&self) -> Result<PooledConnection, Report<PoolError>> {
         tracing::debug!("obtaining primary database connection...");
-        match self.primary_db().acquire().await {
-            Ok(conn) => Ok(conn),
-            Err(error) => {
-                if let PoolError::Unhealthy = error.current_context()
-                    && let Some(replica) = self.replica_db().as_ref()
-                {
-                    tracing::warn!(
-                        ?error,
-                        "primary database is unhealthy, falling back to replica"
-                    );
-                    return replica.acquire().await;
-                };
-                Err(error)
+
+        let error = match self.acquire_from_primary().await {
+            Ok(conn) => return Ok(conn),
+            Err(error) => error,
+        };
+
+        if let PoolError::Unhealthy = error.current_context()
+            && let Some(replica) = self.replica_db().as_ref()
+        {
+            tracing::warn!(
+                ?error,
+                "primary database is unhealthy, falling back to replica"
+            );
+
+            let start = Instant::now();
+            let result = replica.acquire().await;
+
+            if let Some(metrics) = self.metrics.as_ref() {
+                metrics
+                    .database_time_to_acquire_connection
+                    .get_metric_with_label_values(&["replica"])
+                    .expect("should only require one label")
+                    .observe(start.elapsed().as_secs_f64());
             }
+
+            return result;
         }
+
+        Err(error)
+    }
+}
+
+impl DatabasePools {
+    async fn acquire_from_primary(&self) -> Result<PooledConnection, Report<PoolError>> {
+        let start = Instant::now();
+        let conn = self.primary_db().acquire().await;
+        if let Some(metrics) = self.metrics.as_ref() {
+            metrics
+                .database_time_to_acquire_connection
+                .get_metric_with_label_values(&["primary"])
+                .expect("should only require one label")
+                .observe(start.elapsed().as_secs_f64());
+        }
+        conn
     }
 }

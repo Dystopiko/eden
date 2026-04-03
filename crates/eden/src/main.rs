@@ -4,6 +4,7 @@ use eden_core::{
     jobs::{JobContext, RunnerExt},
     kernel::Kernel,
 };
+use eden_prometheus::InstanceMetrics;
 use eden_utils::signals::ShutdownSignal;
 use erased_report::ErasedReport;
 use error_stack::{Report, ResultExt};
@@ -29,9 +30,23 @@ fn main() -> Result<(), ErasedReport> {
     let kernel = rt.block_on(async {
         let token = config.bot.token.as_str().to_string();
         let http = Arc::new(twilight_http::Client::builder().token(token).build());
+        let metrics = config
+            .prometheus
+            .is_some()
+            .then(|| InstanceMetrics::new().expect("should build instance metrics successfully"));
+
+        tracing::info!(
+            "Prometheus integration is {}",
+            if metrics.is_some() {
+                "enabled"
+            } else {
+                "disabled"
+            }
+        );
 
         let built = Kernel::builder()
-            .pools_from_config(&config.database)?
+            .pools_from_config(&config.database, metrics.as_ref())?
+            .maybe_metrics(metrics)
             .config(Arc::new(config))
             .http(http)
             .shutdown_signal(ShutdownSignal::new())

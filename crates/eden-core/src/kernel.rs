@@ -2,6 +2,7 @@ use bon::Builder;
 use eden_background_worker::{BackgroundJob, background_job::EnqueueJobError};
 use eden_config::{Config, sections::minecraft::UuidOrUsername};
 use eden_database::{DatabasePools, Settings, settings::SettingsQueryError, views::McAccountView};
+use eden_prometheus::InstanceMetrics;
 use eden_sqlite::{Pool, error::PoolBuildError};
 use eden_utils::signals::ShutdownSignal;
 use error_stack::{Report, ResultExt};
@@ -21,6 +22,9 @@ pub struct Kernel {
 
     /// Discord's Rest API client
     pub http: Arc<twilight_http::Client>,
+
+    /// Metrics of an instance
+    pub metrics: Option<InstanceMetrics>,
 
     /// Database connection pool connected to either primary or
     /// primary+replica databases
@@ -108,6 +112,7 @@ impl<S: kernel_builder::State> KernelBuilder<S> {
     pub fn pools_from_config(
         self,
         config: &eden_config::sections::Database,
+        metrics: Option<&InstanceMetrics>,
     ) -> Result<KernelBuilder<kernel_builder::SetPools<S>>, Report<PoolBuildError>>
     where
         S::Pools: kernel_builder::IsUnset,
@@ -125,6 +130,7 @@ impl<S: kernel_builder::State> KernelBuilder<S> {
         let pools = DatabasePools::builder()
             .primary_db(primary_db)
             .maybe_replica_db(replica_db)
+            .maybe_metrics(metrics.cloned())
             .build();
 
         Ok(self.pools(pools))

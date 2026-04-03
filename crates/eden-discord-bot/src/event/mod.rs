@@ -39,9 +39,20 @@ pub async fn handle(ctx: EventContext, event: Event) {
     tracing::trace!("received event");
 
     match event {
+        Event::GatewayHeartbeatAck => update_shard_metrics(&ctx),
         Event::GuildCreate(guild) => self::guild_create::handle(ctx, &guild).await,
         Event::MessageCreate(inner) => self::message_create::handle(&ctx, inner).await,
         Event::Ready(ready) => self::ready::handle(&ctx, &ready),
         _ => {}
     };
+}
+
+fn update_shard_metrics(ctx: &EventContext) {
+    if let Some(metrics) = ctx.kernel.metrics.as_ref() {
+        metrics
+            .shard_latencies
+            .get_metric_with_label_values(&[ctx.shard.id().to_string()])
+            .expect("should only require one label")
+            .observe(ctx.shard.latency().unwrap_or_default().as_secs_f64());
+    }
 }

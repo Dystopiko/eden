@@ -26,6 +26,7 @@ pub enum ServiceError {
 }
 
 const EVENT_TYPE_FLAGS: EventTypeFlags = EventTypeFlags::READY
+    .union(EventTypeFlags::GATEWAY_HEARTBEAT_ACK)
     .union(EventTypeFlags::GUILD_CREATE)
     .union(EventTypeFlags::MESSAGE_CREATE);
 
@@ -171,6 +172,10 @@ async fn dispatch_events(
             .build();
 
         tasks.spawn(self::event::handle(ctx, event));
+
+        if let Some(metrics) = kernel.metrics.as_ref() {
+            metrics.events_processed.inc();
+        }
     }
 
     tracing::debug!("event dispatcher stopped (stream exhausted)");

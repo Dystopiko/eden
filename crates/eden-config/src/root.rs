@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use toml_edit::Document;
 
 use crate::{
-    sections::{Bot, Database, Gateway, Minecraft, Sentry, setup::Setup},
+    sections::{Bot, Database, Gateway, Minecraft, Prometheus, Sentry, setup::Setup},
     validate::{Validate, ValidationContext},
 };
 
@@ -23,6 +23,9 @@ pub struct Config {
 
     #[serde(default)]
     pub minecraft: Minecraft,
+
+    #[serde(default)]
+    pub prometheus: Option<Prometheus>,
 
     #[serde(default)]
     pub setup: Setup,

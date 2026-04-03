@@ -11,6 +11,7 @@ eden-background-worker = { workspace = true }
 eden-config = { workspace = true }
 eden-database = { workspace = true }
 eden-gateway-api = { path = "../eden-gateway-api", features = ["server"] }
+eden-prometheus = { path = "../eden-prometheus" }
 eden-sqlite = { workspace = true }
 eden-text-handling = { workspace = true }
 eden-twilight = { workspace = true }

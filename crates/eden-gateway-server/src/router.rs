@@ -29,6 +29,7 @@ pub fn build(kernel: Arc<Kernel>, ratelimiter: Arc<RateLimiter>) -> Router<()> {
             put(alerts::admin_commands::publish),
         )
         .route("/members/link/minecraft", post(members::link::minecraft))
+        .route("/metrics", get(metrics::prometheus))
         .route("/sessions/validate", post(sessions::validate::validate))
         .route("/sessions", post(sessions::post::post))
         .layer(Extension(ratelimiter));
