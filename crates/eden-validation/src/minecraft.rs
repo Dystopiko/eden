@@ -27,6 +27,10 @@ pub enum InvalidMcUsername {
     Bedrock,
 }
 
+const fn is_valid_username_char(c: char) -> bool {
+    c.is_ascii_alphanumeric() || c == '_'
+}
+
 // Based from: https://www.minecraftforum.net/forums/minecraft-java-edition/suggestions/3007464-minecraft-username-rules
 pub fn validate_username(name: &str, bedrock: bool) -> Result<(), Report<InvalidMcUsername>> {
     macro_rules! default_err {
@@ -43,18 +47,18 @@ pub fn validate_username(name: &str, bedrock: bool) -> Result<(), Report<Invalid
         default_err!()
     }
 
-    let has_valid_prefix = ACCEPTED_FLOODGATE_PREFIXES.contains(
-        &name
-            .chars()
-            .next()
-            .expect("should have at least one character"),
-    );
+    let mut chars = name.chars();
+    if bedrock {
+        let first = chars.next().expect("should have at least one character");
+        let has_valid_prefix =
+            ACCEPTED_FLOODGATE_PREFIXES.contains(&first) || is_valid_username_char(first);
 
-    if bedrock && !has_valid_prefix {
-        default_err!()
+        if bedrock && !has_valid_prefix {
+            default_err!()
+        }
     }
 
-    if !name.chars().all(|v| v.is_ascii_alphanumeric() || v == '_') {
+    if !chars.all(is_valid_username_char) {
         default_err!()
     }
 
