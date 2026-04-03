@@ -11,7 +11,7 @@ use eden_validation::minecraft::validate_username;
 use erased_report::ErasedReport;
 use error_stack::ResultExt;
 use sha2::Digest;
-use std::{sync::Arc, time::Duration};
+use std::{borrow::Cow, sync::Arc, time::Duration};
 use thiserror::Error;
 use tokio::task::spawn_blocking;
 
@@ -33,7 +33,8 @@ pub async fn minecraft(
     Extension(logs): Extension<RequestLogs>,
     Json(body): Json<LinkMcAccount>,
 ) -> ApiResult<Response> {
-    validate_username(&body.username, !body.java)?;
+    validate_username(&body.username, !body.java)
+        .map_err(|e| ApiError::from_owned(ErrorCode::InvalidRequest, Cow::Owned(e.to_string())))?;
 
     let rl_actor = Actor::Ip(body.ip);
     logs.add("ratelimit.actor", format!("{rl_actor:?}"));

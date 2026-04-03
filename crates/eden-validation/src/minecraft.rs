@@ -1,4 +1,3 @@
-use error_stack::Report;
 use thiserror::Error;
 
 const MIN_CHARS: usize = 3;
@@ -32,13 +31,13 @@ const fn is_valid_username_char(c: char) -> bool {
 }
 
 // Based from: https://www.minecraftforum.net/forums/minecraft-java-edition/suggestions/3007464-minecraft-username-rules
-pub fn validate_username(name: &str, bedrock: bool) -> Result<(), Report<InvalidMcUsername>> {
+pub fn validate_username(name: &str, bedrock: bool) -> Result<(), InvalidMcUsername> {
     macro_rules! default_err {
         () => {
             return if bedrock {
-                Err(Report::new(InvalidMcUsername::Bedrock))
+                Err(InvalidMcUsername::Bedrock)
             } else {
-                Err(Report::new(InvalidMcUsername::Java))
+                Err(InvalidMcUsername::Java)
             }
         };
     }
