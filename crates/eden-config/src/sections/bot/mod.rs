@@ -1,8 +1,13 @@
+use std::collections::HashSet;
+
 use constant_time_eq::constant_time_eq;
 use eden_toml::TomlDiagnostic;
 use error_stack::Report;
 use serde::Deserialize;
-use twilight_model::id::{Id, marker::ApplicationMarker};
+use twilight_model::id::{
+    Id,
+    marker::{ApplicationMarker, UserMarker},
+};
 
 pub mod primary_guild;
 pub use self::primary_guild::PrimaryGuild;
@@ -17,6 +22,7 @@ pub struct Bot {
     #[serde(default = "default_enabled")]
     pub enabled: bool,
     pub primary_guild: PrimaryGuild,
+    pub swearing_police: SwearingPolice,
     pub token: Token,
 }
 
@@ -54,6 +60,30 @@ impl Validate for Bot {
             return Err(diagnostic);
         }
 
+        self.swearing_police.validate(ctx)?;
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+pub struct SwearingPolice {
+    /// A list of user IDs that are excluded from receiving
+    /// warnings from the swearing police.
+    pub excluded_users: HashSet<Id<UserMarker>>,
+}
+
+impl Default for SwearingPolice {
+    fn default() -> Self {
+        Self {
+            excluded_users: HashSet::new(),
+        }
+    }
+}
+
+impl Validate for SwearingPolice {
+    fn validate(&self, _ctx: &ValidationContext<'_>) -> Result<(), Report<TomlDiagnostic>> {
+        // excluded_users unique entry validation is already checked with
+        // the help of the Deserialize trait implementation for HashSet
         Ok(())
     }
 }
