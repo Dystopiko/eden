@@ -55,8 +55,7 @@ pub fn is_maybe_domain(text: &str) -> bool {
 /// - Discord mention tags (e.g. `<@123456789>`)
 /// - Valid URLs (e.g. `https://example.com`)
 /// - Bare domain-like tokens (e.g. `example.com`)
-/// - Tokens that are purely numeric (e.g. `12345`)
-/// - Tokens that are purely punctuation or symbols with no alphabetic content
+/// - Tokens with one or more non-alphabetic characters
 #[must_use]
 pub fn is_maybe_word(word: &str) -> bool {
     static DISCORD_MENTION_TAGS: LazyLock<Regex> =
@@ -76,13 +75,8 @@ pub fn is_maybe_word(word: &str) -> bool {
         return false;
     }
 
-    // Exclude purely numeric tokens.
-    if word.chars().all(|c| c.is_numeric()) {
-        return false;
-    }
-
-    // Exclude tokens with no alphabetic content at all
-    if !word.chars().any(|c| c.is_alphabetic()) {
+    // Exclude tokens with non-alphabetic content at all
+    if word.chars().any(|c| !c.is_alphabetic()) {
         return false;
     }
 
@@ -92,6 +86,14 @@ pub fn is_maybe_word(word: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::{is_maybe_domain, is_maybe_word};
+
+    #[test]
+    fn should_fix_issue_13() {
+        static CASES: &[&str] = &["<:mhm:1111111111>", "newmessage<:mhm:112233>"];
+        for case in CASES {
+            assert!(!is_maybe_domain(case), "{case:?} should be invalid");
+        }
+    }
 
     #[test]
     fn test_is_maybe_word_with_invalid_cases() {
