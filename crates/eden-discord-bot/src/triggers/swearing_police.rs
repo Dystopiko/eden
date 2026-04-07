@@ -21,13 +21,13 @@ pub struct SwearingPolice;
 static WARNING_TEMPLATES: OnceLock<Vec<String>> = OnceLock::new();
 
 const DEFAULT_TEMPLATES: &[&str] = &[
-    "Did your mom told you not to say {BAD_WORDS} to everyone? If you have nothing nice to say in this server, then shut up!",
+    "Did your mom tell you not to say {BAD_WORDS} to everyone? If you have nothing nice to say in this server, then shut up!",
     "You said {BAD_WORDS}. My goodness, you're a bad person {PREFERRED_USER_NAME}!",
-    "Did you know that saying {BAD_WORDS} is not nice?",
-    "> *Do not let any unwholesome talk come out of your mouths, but only what is helpful for building others up according to their needs, that it may benefit those who listen.*\n> \n> Ephesians 4:29 (NIV)",
+    "Did you know that saying {BAD_WORDS} is/are not nice?",
+    "> *Do not let any unwholesome talk come out of your mouths, but only what is helpful for building others up according to their needs, that it may benefit those who listen.*\n> \n> Ephesians 4:29 (NIV). God is watching you. So am I...",
     "Can you say something nice next time? Thank you for your cooperation! :)",
     "Your message will be reported to the server administrators. Do not ever swear again!",
-    "Try to say {BAD_WORDS} again for me, please?",
+    "Try to say {BAD_WORDS} again for me, please? I dare you!",
     // copied from dad bot
     "Listen here {PREFERRED_USER_NAME}, I will not tolerate you saying the words that consist of the letters {BAD_WORDS} being said in this server, so take your own advice and close thine mouth in the name of the christian minecraft server owner.",
 ];
