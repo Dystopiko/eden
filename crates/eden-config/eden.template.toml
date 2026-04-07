@@ -65,6 +65,17 @@ bad_words = []
 # warnings from the swearing police.
 excluded_users = []
 
+# Additional list of warnings message templates for the
+# swearing police to pick aside from the default ones.
+#
+# Format:
+# - {BAD_WORDS} - Enumeration of bad words that the user said in the message
+# - {PREFERRED_USER_NAME} - User's preferred name
+#
+#   Their preferred name is generated depending on the order below:
+#       their guild nickname -> their global display name -> their username on Discord
+warning_templates = []
+
 # Primary database pool handles most reads and writes,
 # always operating on the latest data revision.
 [database.primary]

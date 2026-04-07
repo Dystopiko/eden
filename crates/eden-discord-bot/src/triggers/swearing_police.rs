@@ -1,8 +1,13 @@
+use eden_config::sections::bot::SwearingPolice as LocalConfig;
 use eden_text_handling::{space_out_by_letter, swearing::RustrictType};
 use eden_twilight::{PERMISSIONS_TO_SEND, http::ResponseFutureExt};
 use erased_report::ErasedReport;
 use rand::seq::IndexedRandom;
-use std::{borrow::Cow, time::Instant};
+use std::{
+    borrow::Cow,
+    sync::{Arc, OnceLock},
+    time::Instant,
+};
 use tokio::task::spawn_blocking;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
@@ -13,7 +18,9 @@ use crate::{
 
 pub struct SwearingPolice;
 
-const WARNING_TEMPLATES: &[&str] = &[
+static WARNING_TEMPLATES: OnceLock<Vec<String>> = OnceLock::new();
+
+const DEFAULT_TEMPLATES: &[&str] = &[
     "Did your mom told you not to say {BAD_WORDS} to everyone? If you have nothing nice to say in this server, then shut up!",
     "You said {BAD_WORDS}. My goodness, you're a bad person {PREFERRED_USER_NAME}!",
     "Did you know that saying {BAD_WORDS} is not nice?",
@@ -65,7 +72,7 @@ impl EventTrigger for SwearingPolice {
             return Ok(EventTriggerResult::Next);
         }
 
-        let Some(template) = SwearingPolice::choose_warning_template().await else {
+        let Some(template) = Self::choose_warning_template(ctx.kernel.config.clone()).await else {
             return Ok(EventTriggerResult::Next);
         };
 
@@ -104,10 +111,10 @@ impl EventTrigger for SwearingPolice {
 }
 
 impl SwearingPolice {
-    async fn choose_warning_template() -> Option<&'static str> {
-        let result = spawn_blocking(|| {
+    async fn choose_warning_template(config: Arc<eden_config::Config>) -> Option<&'static str> {
+        let result = spawn_blocking(move || {
             let mut rng = rand::rng();
-            WARNING_TEMPLATES.choose(&mut rng)
+            Self::get_warning_templates(&config.bot.swearing_police).choose(&mut rng)
         })
         .await;
 
@@ -155,5 +162,16 @@ impl SwearingPolice {
         }
 
         output
+    }
+
+    fn get_warning_templates(config: &LocalConfig) -> &'static [String] {
+        WARNING_TEMPLATES.get_or_init(|| {
+            let total_length = DEFAULT_TEMPLATES.len() + config.warning_templates.len();
+
+            let mut templates = Vec::with_capacity(total_length);
+            templates.extend(DEFAULT_TEMPLATES.iter().map(|v| v.to_string()));
+            templates.extend(config.warning_templates.iter().map(|v| v.to_string()));
+            templates
+        })
     }
 }
