@@ -34,6 +34,18 @@ impl EventTrigger for SwearingPolice {
             return Ok(EventTriggerResult::Next);
         };
 
+        let is_excluded = ctx
+            .kernel
+            .config
+            .bot
+            .swearing_police
+            .excluded_users
+            .contains(&message.author.id);
+
+        if is_excluded {
+            return Ok(EventTriggerResult::Next);
+        }
+
         let now = Instant::now();
         let bad_words = {
             // find_bad_words is a heavy function, give some time to process

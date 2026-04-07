@@ -1,0 +1,7 @@
+---
+source: crates/eden-gateway-api/src/admin/settings.rs
+expression: patch
+---
+{
+  "allow_guests": true
+}

@@ -59,6 +59,12 @@ chaosneco_user_ids = []
 # Accepts words in any language that uses the Latin alphabet.
 bad_words = []
 
+# Configuration for the swearing profile feature.
+[bot.swearing_police]
+# A list of user IDs that are excluded from receiving
+# warnings from the swearing police.
+excluded_users = []
+
 # Primary database pool handles most reads and writes,
 # always operating on the latest data revision.
 [database.primary]
