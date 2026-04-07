@@ -30,6 +30,11 @@ const DEFAULT_TEMPLATES: &[&str] = &[
     "Try to say {BAD_WORDS} again for me, please? I dare you!",
     // copied from dad bot
     "Listen here {PREFERRED_USER_NAME}, I will not tolerate you saying the words that consist of the letters {BAD_WORDS} being said in this server, so take your own advice and close thine mouth in the name of the christian minecraft server owner.",
+    // New warning messages
+    "Awwww, {PREFERRED_USER_NAME} said {BAD_WORDS}! This is soo cuteeee!!",
+    "Wow! You said {BAD_WORDS}! Congratulations! Out of all the words in English, these are the words you went with? Absolutely remarkable!",
+    "Thank you for your submission, {PREFERRED_USER_NAME}, but we regret to inform that your submission has been denied. Please allow yourself to reflect on your decisions within 3-5 days.",
+    "A lot of people told me to keep quiet but I will keep quiet if you behave!",
 ];
 
 impl EventTrigger for SwearingPolice {
