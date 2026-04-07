@@ -2,10 +2,13 @@ use crossbeam::atomic::AtomicCell;
 use eden_core::Kernel;
 use error_stack::{Report, ResultExt};
 use futures::StreamExt;
-use splinter::{ShardConfig, ShardEventStream, ShardHandle, ShardManager, ShardingRange};
+use splinter::{
+    ShardConfig, ShardEventStream, ShardHandle, ShardManager, ShardingRange,
+    config::reconnect_strategies::AlwaysReconnect,
+};
 use std::{sync::Arc, time::Duration};
 use thiserror::Error;
-use tokio::time::MissedTickBehavior;
+use tokio::time::{MissedTickBehavior, timeout};
 use tokio_util::task::TaskTracker;
 use twilight_gateway::{CloseFrame, EventTypeFlags, Intents, queue::InMemoryQueue};
 use twilight_standby::Standby;
@@ -38,6 +41,12 @@ const INTENTS: Intents = Intents::DIRECT_MESSAGES
 const SUPERVISOR_CHECK_INTERVAL: Duration = Duration::from_secs(30);
 const SHARDING_RANGE: ShardingRange = ShardingRange::ONE;
 
+// Minimum wait timeout for all shards to be identified.
+//
+// If it takes more than the specified duration to be identified,
+// it will assume all shards are identified.
+const WAIT_TIMEOUT: Duration = Duration::from_secs(30);
+
 pub async fn service(
     kernel: Arc<Kernel>,
     http: Arc<twilight_http::Client>,
@@ -54,6 +63,8 @@ pub async fn service(
         INTENTS,
         InMemoryQueue::default(),
     );
+
+    config.reconnect_strategy = Some(Arc::new(AlwaysReconnect));
     config.event_type_flags = EVENT_TYPE_FLAGS;
 
     let (shard_manager, events) = ShardManager::new(config, SHARDING_RANGE);
@@ -205,8 +216,12 @@ async fn wait_until_all_identified(
 ) -> Result<(), Report<ServiceError>> {
     let shards = shard_manager.shards().await;
     let futures: Vec<_> = shards.iter().map(|s| s.identified()).collect();
-    futures::future::try_join_all(futures)
-        .await
-        .change_context(ServiceError::Start)
-        .map(|_| ())
+
+    let wait = futures::future::try_join_all(futures);
+    let Ok(result) = timeout(WAIT_TIMEOUT, wait).await else {
+        tracing::warn!("shard identification took longer than expected, skipping wait");
+        return Ok(());
+    };
+
+    result.change_context(ServiceError::Start).map(|_| ())
 }
