@@ -70,12 +70,17 @@ pub struct SwearingPolice {
     /// A list of user IDs that are excluded from receiving
     /// warnings from the swearing police.
     pub excluded_users: HashSet<Id<UserMarker>>,
+
+    /// Additional list of warnings message templates for the
+    /// swearing police to pick aside from the default ones.
+    pub warning_templates: Vec<String>,
 }
 
 impl Default for SwearingPolice {
     fn default() -> Self {
         Self {
             excluded_users: HashSet::new(),
+            warning_templates: Vec::new(),
         }
     }
 }
