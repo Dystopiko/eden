@@ -155,22 +155,24 @@ fn load_config() -> Result<Config, Report<ConfigLoadError>> {
         );
 
         config
-            .edit(|_, document| {
-                if let Some(gateway) = document
-                    .entry("gateway")
-                    .or_insert(toml_edit::table())
-                    .as_table_like_mut()
-                {
-                    gateway
-                        .entry("shared_secret_token")
-                        .or_insert_with(|| toml_edit::value(generate_shared_token()));
-                }
-            })
+            .edit(|_, document| provide_defaults_for_config(document))
             .change_context(ConfigLoadError)?;
     }
 
     tracing::debug!(config = ?&*config, "using config file: {}", config.path().display());
     Ok(config.into_inner())
+}
+
+fn provide_defaults_for_config(document: &mut toml_edit::DocumentMut) {
+    if let Some(gateway) = document
+        .entry("gateway")
+        .or_insert(toml_edit::table())
+        .as_table_like_mut()
+    {
+        gateway
+            .entry("shared_secret_token")
+            .or_insert_with(|| toml_edit::value(generate_shared_token()));
+    }
 }
 
 const GENERATED_TOKEN_LENGTH: usize = 64;
