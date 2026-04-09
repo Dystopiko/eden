@@ -18,7 +18,9 @@ pub async fn middleware(
         return next.run(request).await;
     };
 
+    let method = request.method().as_str().to_string();
     let start = Instant::now();
+
     let response = next.run(request).await;
     metrics.requests_total.inc();
 
@@ -29,8 +31,8 @@ pub async fn middleware(
 
     metrics
         .response_times
-        .with_label_values(&[endpoint])
-        .observe(start.elapsed().as_micros() as f64 / 1_000_000.0);
+        .with_label_values(&[endpoint, &method])
+        .observe(start.elapsed().as_secs_f64());
 
     response
 }
