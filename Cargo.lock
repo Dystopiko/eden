@@ -934,7 +934,7 @@ checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
 name = "eden"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "eden-background-worker",
  "eden-config",
@@ -962,7 +962,7 @@ dependencies = [
 
 [[package]]
 name = "eden-background-worker"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "async-channel",
  "async-trait",
@@ -986,7 +986,7 @@ dependencies = [
 
 [[package]]
 name = "eden-config"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "bon",
  "constant_time_eq",
@@ -1007,7 +1007,7 @@ dependencies = [
 
 [[package]]
 name = "eden-core"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "bon",
  "dashmap",
@@ -1035,7 +1035,7 @@ dependencies = [
 
 [[package]]
 name = "eden-database"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "bon",
  "chrono",
@@ -1060,7 +1060,7 @@ dependencies = [
 
 [[package]]
 name = "eden-discord-bot"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "bon",
  "crossbeam",
@@ -1099,7 +1099,7 @@ dependencies = [
 
 [[package]]
 name = "eden-gateway-api"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "eden-database",
  "eden-timestamp",
@@ -1113,7 +1113,7 @@ dependencies = [
 
 [[package]]
 name = "eden-gateway-server"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "axum",
  "axum-extra",
@@ -1155,7 +1155,7 @@ dependencies = [
 
 [[package]]
 name = "eden-prometheus"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "error-stack",
  "prometheus",
@@ -1164,7 +1164,7 @@ dependencies = [
 
 [[package]]
 name = "eden-sentry"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "eden-config",
  "eden-sqlite",
@@ -1182,7 +1182,7 @@ dependencies = [
 
 [[package]]
 name = "eden-sqlite"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "bon",
  "erased-report",
@@ -1194,7 +1194,7 @@ dependencies = [
 
 [[package]]
 name = "eden-text-handling"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "comrak",
  "criterion",
@@ -1209,7 +1209,7 @@ dependencies = [
 
 [[package]]
 name = "eden-timestamp"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "chrono",
  "claims",
@@ -1225,7 +1225,7 @@ dependencies = [
 
 [[package]]
 name = "eden-toml"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "codespan-reporting",
  "error-stack",
@@ -1236,7 +1236,7 @@ dependencies = [
 
 [[package]]
 name = "eden-twilight"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "error-stack",
  "serde",
@@ -1249,7 +1249,7 @@ dependencies = [
 
 [[package]]
 name = "eden-utils"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "dotenvy",
  "error-stack",
@@ -1269,7 +1269,7 @@ dependencies = [
 
 [[package]]
 name = "eden-validation"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "eden-text-handling",
  "error-stack",
@@ -1329,7 +1329,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "erased-report"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "claims",
  "error-stack",
@@ -3406,9 +3406,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "1.0.27"
+version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d767eb0aabc880b29956c35734170f26ed551a859dbd361d140cdbeca61ab1e2"
+checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
 
 [[package]]
 name = "sentry"
@@ -5429,7 +5429,7 @@ checksum = "32ac00cd3f8ec9c1d33fb3e7958a82df6989c42d747bd326c822b1d625283547"
 
 [[package]]
 name = "xtask"
-version = "2.1.0"
+version = "2.2.0"
 dependencies = [
  "eden-utils",
  "env_logger",
