@@ -1,8 +1,12 @@
+use eden_background_worker::BackgroundJob;
+use eden_core::jobs::CancelMcAccountChallenge;
 use eden_database::primary_guild::{McAccount, McAccountChallenge, McAccountType, Member};
 use eden_sqlite::error::QueryResultExt;
 use eden_twilight::http::ResponseFutureExt;
-use erased_report::ErasedReport;
+use erased_report::{EraseReportExt, ErasedReport};
+use error_stack::ResultExt;
 use sha2::Digest;
+use thiserror::Error;
 use twilight_model::gateway::payload::incoming::MessageCreate;
 
 use crate::{
@@ -17,7 +21,11 @@ impl EventTrigger for SolveMcAccountChallenge {
         ctx: &EventContext,
         message: &MessageCreate,
     ) -> Result<EventTriggerResult, ErasedReport> {
-        if message.guild_id.is_some() {
+        let primary_guild_id = ctx.kernel.config.bot.primary_guild.id;
+        let should_scan_for_codes =
+            message.guild_id == Some(primary_guild_id) || message.guild_id.is_none();
+
+        if !should_scan_for_codes {
             return Ok(EventTriggerResult::Next);
         }
 
@@ -27,12 +35,9 @@ impl EventTrigger for SolveMcAccountChallenge {
             return Ok(EventTriggerResult::Next);
         }
 
-        let mut hasher = sha2::Sha256::new();
-        hasher.update(&message.content);
-
-        let maybe_hashed_code = hex::encode(hasher.finalize());
-
         let mut conn = ctx.kernel.pools.db_write().await?;
+
+        let maybe_hashed_code = Self::hash_content(message.content.clone()).await?;
         let challenge = McAccountChallenge::find_by_hashed_code(&mut conn, &maybe_hashed_code)
             .await
             .optional()?;
@@ -41,6 +46,33 @@ impl EventTrigger for SolveMcAccountChallenge {
             return Ok(EventTriggerResult::Next);
         };
 
+        // If the code is sent to the primary guild, cancel the challenge
+        // immediately and send it back to user.
+        if message.guild_id == Some(primary_guild_id) {
+            CancelMcAccountChallenge(challenge.id)
+                .enqueue(&mut conn)
+                .await?;
+
+            let dm_channel_id = ctx
+                .http
+                .create_private_channel(message.author.id)
+                .model()
+                .await
+                .attach("while trying to create private channel to alert the player")?
+                .id;
+
+            ctx.http
+                .create_message(dm_channel_id)
+                .content(
+                    "Please send the verification code that Eden provided here, next time. Run `/eden link` to \
+                    restart the Minecraft account linking process. (this is required for security)",
+                )
+                .perform()
+                .await?;
+
+            return Ok(EventTriggerResult::Stop);
+        }
+
         // Check if this user is a member of the primary guild
         let is_registered = Member::find_by_discord_user_id(&mut conn, message.author.id.cast())
             .await
@@ -48,6 +80,10 @@ impl EventTrigger for SolveMcAccountChallenge {
             .is_some();
 
         if !is_registered {
+            CancelMcAccountChallenge(challenge.id)
+                .enqueue(&mut conn)
+                .await?;
+
             ctx.http
                 .create_message(message.channel_id)
                 .reply(message.id)
@@ -58,7 +94,6 @@ impl EventTrigger for SolveMcAccountChallenge {
                 .perform()
                 .await?;
 
-            McAccountChallenge::mark_cancelled(&mut conn, challenge.id).await?;
             return Ok(EventTriggerResult::Stop);
         }
 
@@ -91,5 +126,22 @@ impl EventTrigger for SolveMcAccountChallenge {
 
         conn.commit().await.map_err(ErasedReport::new)?;
         Ok(EventTriggerResult::Stop)
+    }
+}
+
+impl SolveMcAccountChallenge {
+    async fn hash_content(content: String) -> Result<String, ErasedReport> {
+        #[derive(Debug, Error)]
+        #[error("tokio task panicked while generating a hash from a message content")]
+        struct TaskPanicked;
+
+        tokio::task::spawn_blocking(move || {
+            let mut hasher = sha2::Sha256::new();
+            hasher.update(&content);
+            hex::encode(hasher.finalize())
+        })
+        .await
+        .change_context(TaskPanicked)
+        .erase_report()
     }
 }

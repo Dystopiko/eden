@@ -4,9 +4,11 @@ use std::sync::Arc;
 
 pub mod alerts;
 pub mod events;
+pub mod minecraft;
 
 pub use self::alerts::*;
 pub use self::events::*;
+pub use self::minecraft::*;
 
 #[derive(Debug, Builder)]
 #[builder(finish_fn(name = "build_inner", vis = ""))]
@@ -37,5 +39,6 @@ impl RunnerExt for Runner<Arc<JobContext>> {
     fn register_core_job_types(self) -> Self {
         self.register_job_type::<AdminCommandAlertJob>()
             .register_job_type::<OnPlayerJoined>()
+            .register_job_type::<CancelMcAccountChallenge>()
     }
 }

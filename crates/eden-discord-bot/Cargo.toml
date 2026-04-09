@@ -7,6 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+eden-background-worker = { workspace = true }
 eden-config = { workspace = true }
 eden-core = { path = "../eden-core" }
 eden-database = { workspace = true }

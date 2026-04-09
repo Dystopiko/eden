@@ -1064,6 +1064,7 @@ version = "2.1.0"
 dependencies = [
  "bon",
  "crossbeam",
+ "eden-background-worker",
  "eden-config",
  "eden-core",
  "eden-database",
