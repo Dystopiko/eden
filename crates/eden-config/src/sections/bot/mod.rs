@@ -22,6 +22,7 @@ pub struct Bot {
     #[serde(default = "default_enabled")]
     pub enabled: bool,
     pub primary_guild: PrimaryGuild,
+    #[serde(default)]
     pub swearing_police: SwearingPolice,
     pub token: Token,
 }
@@ -66,6 +67,7 @@ impl Validate for Bot {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+#[serde(default)]
 pub struct SwearingPolice {
     /// A list of user IDs that are excluded from receiving
     /// warnings from the swearing police.
