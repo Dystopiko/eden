@@ -1,7 +1,4 @@
-use eden_database::{
-    Settings, Timestamp,
-    primary_guild::{Member, contributor::Contributor},
-};
+use eden_database::Settings;
 use eden_twilight::http::HttpResultExt;
 use erased_report::ErasedReport;
 use twilight_model::{gateway::payload::incoming::GuildCreate, guild::Guild};
@@ -65,44 +62,20 @@ async fn setup_primary_guild(ctx: &EventContext, guild: &Guild) -> Result<(), Er
 
         tracing::debug!("looking up {} member(s)", members.len());
         for member in members {
-            let is_contributor = member
-                .roles
-                .iter()
-                .find(|&&v| v == primary_guild_cfg.contributor_role_id)
-                .is_some();
-
-            let is_member = member
-                .roles
-                .iter()
-                .find(|&&v| v == primary_guild_cfg.member_role_id)
-                .is_some()
-                || is_contributor;
-
-            if is_member {
-                tracing::trace!("setting up member info for {}", member.user.id);
-
-                let joined_at = member
-                    .joined_at
-                    .map(|v| Timestamp::from_secs(v.as_secs()).unwrap());
-
-                Member::upsert()
-                    .discord_user_id(member.user.id)
-                    .maybe_joined_at(joined_at)
-                    .name(&member.user.name)
-                    .build()
-                    .perform(&mut conn)
-                    .await?;
+            let should_insert = member.roles.contains(&primary_guild_cfg.member_role_id);
+            if !should_insert {
+                continue;
             }
 
-            if is_contributor {
-                tracing::trace!("setting up contributor info for {}", member.user.id);
-
-                Contributor::upsert()
-                    .member_id(member.user.id)
-                    .build()
-                    .perform(&mut conn)
-                    .await?;
-            }
+            tracing::trace!("setting up member info for {}", member.user.id);
+            crate::primary_guild::setup_member(
+                &ctx.kernel,
+                &mut conn,
+                member.joined_at,
+                &member.roles,
+                &member.user,
+            )
+            .await?;
         }
     } else {
         tracing::warn!(

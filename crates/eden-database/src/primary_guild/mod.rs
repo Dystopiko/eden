@@ -7,6 +7,7 @@ pub mod minecraft;
 pub mod staff;
 
 pub use self::chaos::Chaos;
+pub use self::contributor::Contributor;
 pub use self::logged_in_event::LoggedInEvent;
 pub use self::mc_account_challenge::{McAccountChallenge, McAccountChallengeStatus};
 pub use self::member::{Member, UpsertMember};

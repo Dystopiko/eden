@@ -31,10 +31,12 @@ pub enum ServiceError {
 const EVENT_TYPE_FLAGS: EventTypeFlags = EventTypeFlags::READY
     .union(EventTypeFlags::GATEWAY_HEARTBEAT_ACK)
     .union(EventTypeFlags::GUILD_CREATE)
+    .union(EventTypeFlags::MEMBER_UPDATE)
     .union(EventTypeFlags::MESSAGE_CREATE);
 
 const INTENTS: Intents = Intents::DIRECT_MESSAGES
     .union(Intents::GUILDS)
+    .union(Intents::GUILD_MEMBERS)
     .union(Intents::GUILD_MESSAGES)
     .union(Intents::MESSAGE_CONTENT);
 

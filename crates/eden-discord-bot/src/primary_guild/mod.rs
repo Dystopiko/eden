@@ -1,3 +1,5 @@
+use eden_core::Kernel;
+use eden_database::Timestamp;
 use eden_twilight::{PERMISSIONS_TO_SEND, find_everyone_role, http::ResponseFutureExt};
 use error_stack::{Report, ResultExt};
 use std::collections::HashMap;
@@ -5,6 +7,9 @@ use thiserror::Error;
 use twilight_model::{
     channel::{Channel, ChannelType},
     guild::{Guild, Member, Permissions},
+    id::{Id, marker::RoleMarker},
+    user::User,
+    util::Timestamp as TwilightTimestamp,
 };
 use twilight_util::permission_calculator::PermissionCalculator;
 use unindent::unindent;
@@ -13,6 +18,10 @@ use unindent::unindent;
 #[derive(Debug, Error)]
 #[error("Failed to send welcome message")]
 pub struct SendWelcomeMessageError;
+
+#[derive(Debug, Error)]
+#[error("Failed to setup member automatically")]
+pub struct SetupMemberError;
 
 /// Welcome message sent to the primary guild when Eden first joins it.
 #[allow(dead_code)]
@@ -23,6 +32,52 @@ pub const PRIMARY_GUILD_WELCOME_MESSAGE: &str = concat!(
     env!("CARGO_PKG_REPOSITORY"),
     "/issues",
 );
+
+/// Inserts a member into the database from a guild member type.
+pub async fn setup_member(
+    kernel: &Kernel,
+    conn: &mut eden_sqlite::Transaction<'_>,
+    joined_at: Option<TwilightTimestamp>,
+    roles: &[Id<RoleMarker>],
+    user: &User,
+) -> Result<(), Report<SetupMemberError>> {
+    let primary_guild_cfg = &kernel.config.bot.primary_guild;
+    let is_member = roles
+        .iter()
+        .find(|&&v| v == primary_guild_cfg.member_role_id)
+        .is_some();
+
+    if !is_member {
+        return Err(Report::new(SetupMemberError))
+            .attach("specified member is not a member for an organization");
+    }
+
+    let is_contributor = roles
+        .iter()
+        .find(|&&v| v == primary_guild_cfg.contributor_role_id)
+        .is_some();
+
+    let joined_at = joined_at.map(|v| Timestamp::from_secs(v.as_secs()).unwrap());
+    eden_database::primary_guild::Member::upsert()
+        .discord_user_id(user.id)
+        .maybe_joined_at(joined_at)
+        .name(&user.name)
+        .build()
+        .perform(&mut *conn)
+        .await
+        .change_context(SetupMemberError)?;
+
+    if is_contributor {
+        eden_database::primary_guild::Contributor::upsert()
+            .member_id(user.id)
+            .build()
+            .perform(&mut *conn)
+            .await
+            .change_context(SetupMemberError)?;
+    }
+
+    Ok(())
+}
 
 /// Sends the primary-guild welcome message on behalf of the bot.
 ///

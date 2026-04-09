@@ -8,6 +8,7 @@ use twilight_model::id::{Id, marker::ApplicationMarker};
 use twilight_standby::Standby;
 
 mod guild_create;
+mod member_update;
 mod message_create;
 mod ready;
 
@@ -41,6 +42,7 @@ pub async fn handle(ctx: EventContext, event: Event) {
     match event {
         Event::GatewayHeartbeatAck => update_shard_metrics(&ctx),
         Event::GuildCreate(guild) => self::guild_create::handle(ctx, &guild).await,
+        Event::MemberUpdate(member) => self::member_update::handle(&ctx, member).await,
         Event::MessageCreate(inner) => self::message_create::handle(&ctx, inner).await,
         Event::Ready(ready) => self::ready::handle(&ctx, &ready),
         _ => {}
