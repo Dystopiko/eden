@@ -25,7 +25,7 @@ metrics! {
             pub database_idle_conns: IntGaugeVec["pool"],
 
             /// Number of used database connections in the pool
-            pub database_used_conns: IntGaugeVec["pool]"],
+            pub database_used_conns: IntGaugeVec["pool"],
 
             /// Total time required to acquire a database connection
             pub database_time_to_acquire_connection: HistogramVec["pool"],
