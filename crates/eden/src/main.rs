@@ -6,7 +6,7 @@ use eden_core::{
 };
 use eden_prometheus::InstanceMetrics;
 use eden_utils::signals::ShutdownSignal;
-use erased_report::ErasedReport;
+use erased_report::{EraseReportExt, ErasedReport};
 use error_stack::{Report, ResultExt};
 use futures::{FutureExt, TryFutureExt};
 use rand::seq::IteratorRandom;
@@ -55,9 +55,26 @@ fn main() -> Result<(), ErasedReport> {
     })?;
 
     // Perform database migrations for the primary pool only.
-    rt.block_on(eden_database::migrations::perform(
-        kernel.pools.primary_db(),
-    ))?;
+    rt.block_on(async {
+        tracing::info!("Checking for any unapplied database migrations");
+
+        let pool = kernel.pools.primary_db();
+        if !eden_database::migrations::needs_migration(pool).await? {
+            tracing::info!("Primary database is up to date");
+            return Ok(());
+        }
+
+        if let Err(error) = eden_database::migrations::perform(pool).await {
+            return Err(error)
+                .attach(format!(
+                    "Please report this issue at {}",
+                    env!("CARGO_PKG_REPOSITORY")
+                ))
+                .erase_report();
+        }
+
+        Ok::<_, ErasedReport>(())
+    })?;
 
     let _sentry = eden_sentry::init(kernel.config.sentry.as_ref());
     if _sentry.is_some() {

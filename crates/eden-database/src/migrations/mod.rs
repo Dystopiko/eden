@@ -1,13 +1,43 @@
 use error_stack::{Report, ResultExt};
-use sqlx::migrate::Migrator;
-use std::time::Instant;
+use sqlx::migrate::{Migrate, Migrator};
+use std::{collections::HashMap, time::Instant};
 use thiserror::Error;
 
 pub(crate) static MIGRATIONS: Migrator = sqlx::migrate!("../../migrations");
 
 #[derive(Debug, Error)]
+#[error("Failed to check database migrations")]
+pub struct CheckMigrationsError;
+
+#[derive(Debug, Error)]
 #[error("Failed to run database migrations")]
 pub struct RunMigrationsError;
+
+pub async fn needs_migration(
+    pool: &eden_sqlite::Pool,
+) -> Result<bool, Report<CheckMigrationsError>> {
+    let mut conn = pool.begin().await.change_context(CheckMigrationsError)?;
+    conn.ensure_migrations_table()
+        .await
+        .change_context(CheckMigrationsError)?;
+
+    let applied_migrations = conn
+        .list_applied_migrations()
+        .await
+        .change_context(CheckMigrationsError)?;
+
+    let applied_migrations: HashMap<_, _> = applied_migrations
+        .into_iter()
+        .map(|m| (m.version, m))
+        .collect();
+
+    let needs_migration = MIGRATIONS
+        .iter()
+        .filter(|v| !v.migration_type.is_down_migration())
+        .any(|v| !applied_migrations.contains_key(&v.version));
+
+    Ok(needs_migration)
+}
 
 #[tracing::instrument(skip_all, name = "db.perform_migrations")]
 pub async fn perform(pool: &eden_sqlite::Pool) -> Result<(), Report<RunMigrationsError>> {
