@@ -48,11 +48,7 @@ pub async fn handle(ctx: EventContext, event: Event) {
 }
 
 fn update_shard_metrics(ctx: &EventContext) {
-    if let Some(metrics) = ctx.kernel.metrics.as_ref() {
-        metrics
-            .shard_latencies
-            .get_metric_with_label_values(&[ctx.shard.id().to_string()])
-            .expect("should only require one label")
-            .observe(ctx.shard.latency().unwrap_or_default().as_secs_f64());
+    if let Some((metrics, latency)) = ctx.kernel.metrics.as_ref().zip(ctx.shard.latency()) {
+        metrics.shard_latency.set(latency.as_secs_f64());
     }
 }
