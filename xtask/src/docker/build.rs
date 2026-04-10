@@ -26,6 +26,12 @@ impl flags::Build {
         log::debug!("docker.path = {}", docker_exec.display());
         log::debug!("workspace.path = {}", workspace_dir.display());
 
+        // Update the cargo lockfile since we're going to build the
+        // entire Eden binary with `--locked` flag.
+        cmd!(sh, "cargo update")
+            .run()
+            .attach("could not update Cargo.lock file")?;
+
         build_image(sh, &workspace_dir, &image, profile)
     }
 }
