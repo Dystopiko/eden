@@ -89,11 +89,19 @@ fn main() -> Result<(), ErasedReport> {
             .kernel(kernel.clone())
             .build();
 
-        let workers_handle = Runner::new(job_context, kernel.pools.clone())
-            .register_core_job_types()
-            .workers(4)
-            .poll_interval(Duration::from_secs(1))
-            .start_with_job_distributor(Some(Duration::from_secs(3)));
+        let workers_handle = kernel.config.background_jobs.enabled.then(|| {
+            Runner::new(job_context, kernel.pools.clone())
+                .register_core_job_types()
+                .workers(4)
+                .poll_interval(Duration::from_secs(1))
+                .start_with_job_distributor(Some(Duration::from_secs(3)))
+        });
+
+        if workers_handle.is_some() {
+            tracing::info!("Background job runner is enabled");
+        } else {
+            tracing::info!("Background job runner is disabled");
+        }
 
         let discord = if kernel.config.bot.enabled {
             eden_discord_bot::service(kernel.clone(), kernel.http.clone())
@@ -120,7 +128,9 @@ fn main() -> Result<(), ErasedReport> {
         });
 
         let result = tokio::try_join!(discord, gateway);
-        workers_handle.shutdown().await;
+        if let Some(handle) = workers_handle {
+            handle.shutdown().await;
+        }
 
         result.map(|_| ())
     });

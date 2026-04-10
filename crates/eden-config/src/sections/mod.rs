@@ -7,6 +7,7 @@
 // 3. Register the module in `src/sections/mod.rs`.
 // 4. Add a `self.<name>.validate(ctx)?;` call in [`Config::validate`] below.
 
+pub mod background_jobs;
 pub mod bot;
 pub mod database;
 pub mod gateway;
@@ -15,6 +16,7 @@ pub mod prometheus;
 pub mod sentry;
 pub mod setup;
 
+pub use self::background_jobs::BackgroundJobs;
 pub use self::bot::Bot;
 pub use self::database::{Database, DatabasePool, SqliteUrl};
 pub use self::gateway::Gateway;

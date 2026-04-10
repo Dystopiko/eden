@@ -20,6 +20,7 @@ thiserror = { workspace = true }
 toml_edit = { workspace = true }
 twilight-model = { workspace = true }
 uuid = { workspace = true }
+num_cpus = "1.17.0"
 
 [dev-dependencies]
 bon = { workspace = true }

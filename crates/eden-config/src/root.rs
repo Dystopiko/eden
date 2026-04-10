@@ -6,13 +6,16 @@ use std::path::{Path, PathBuf};
 use toml_edit::Document;
 
 use crate::{
-    sections::{Bot, Database, Gateway, Minecraft, Sentry, setup::Setup},
+    sections::{BackgroundJobs, Bot, Database, Gateway, Minecraft, Sentry, setup::Setup},
     validate::{Validate, ValidationContext},
 };
 
 /// The root configuration structure for Eden.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct Config {
+    #[serde(default)]
+    pub background_jobs: BackgroundJobs,
+
     pub bot: Bot,
 
     #[serde(default)]
