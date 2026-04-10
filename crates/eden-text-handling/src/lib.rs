@@ -1,6 +1,4 @@
-use regex::Regex;
-use std::sync::LazyLock;
-
+pub mod discord;
 pub mod generator;
 pub mod markdown;
 pub mod swearing;
@@ -52,16 +50,15 @@ pub fn is_maybe_domain(text: &str) -> bool {
 ///
 /// This is a heuristic filter — it errs on the side of inclusion to avoid
 /// false negatives. The following are excluded:
-/// - Discord mention tags (e.g. `<@123456789>`)
+/// - [Discord tags prescribed in the documentation]
 /// - Valid URLs (e.g. `https://example.com`)
 /// - Bare domain-like tokens (e.g. `example.com`)
-/// - Tokens with one or more non-alphabetic characters
+/// - Words with purely numbers or symbols
+///
+/// [Discord tags prescribed in the documentation]: https://docs.discord.com/developers/reference#message-formatting
 #[must_use]
 pub fn is_maybe_word(word: &str) -> bool {
-    static DISCORD_MENTION_TAGS: LazyLock<Regex> =
-        LazyLock::new(|| Regex::new(r"<@[0-9]+>").unwrap());
-
-    if DISCORD_MENTION_TAGS.is_match(word) {
+    if self::discord::has_message_tags(word) {
         return false;
     }
 
@@ -75,8 +72,11 @@ pub fn is_maybe_word(word: &str) -> bool {
         return false;
     }
 
-    // Exclude tokens with non-alphabetic content at all
-    if word.chars().any(|c| !c.is_alphabetic()) {
+    // Exclude words with purely numbers or symbols
+    if word
+        .chars()
+        .all(|v| v.is_ascii_punctuation() || v.is_numeric())
+    {
         return false;
     }
 
