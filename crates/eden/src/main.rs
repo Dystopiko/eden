@@ -10,7 +10,7 @@ use erased_report::{EraseReportExt, ErasedReport};
 use error_stack::{Report, ResultExt};
 use futures::{FutureExt, TryFutureExt};
 use rand::seq::IteratorRandom;
-use std::{path::Path, sync::Arc};
+use std::{path::Path, sync::Arc, time::Duration};
 
 fn main() -> Result<(), ErasedReport> {
     let dotenv = eden_utils::env::load().ok().flatten();
@@ -91,8 +91,9 @@ fn main() -> Result<(), ErasedReport> {
 
         let workers_handle = Runner::new(job_context, kernel.pools.clone())
             .register_core_job_types()
-            .workers(1)
-            .start();
+            .workers(4)
+            .poll_interval(Duration::from_secs(1))
+            .start_with_job_distributor(Some(Duration::from_secs(3)));
 
         let discord = if kernel.config.bot.enabled {
             eden_discord_bot::service(kernel.clone(), kernel.http.clone())
