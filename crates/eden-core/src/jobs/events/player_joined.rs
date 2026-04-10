@@ -39,10 +39,6 @@ impl BackgroundJob for OnPlayerJoined {
             return Ok(());
         };
 
-        if !ctx.kernel.can_send_alerts_to_discord(channel_id, None) {
-            return Ok(());
-        }
-
         let embed = generate_alert_embed(event);
         ctx.discord
             .create_message(channel_id)

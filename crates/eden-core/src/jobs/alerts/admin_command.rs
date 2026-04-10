@@ -35,10 +35,6 @@ impl BackgroundJob for AdminCommandAlertJob {
             return Ok(());
         };
 
-        if !ctx.kernel.can_send_alerts_to_discord(channel_id, None) {
-            return Ok(());
-        }
-
         let partial_embed = EmbedBuilder::new()
             .title(format!("`{}`", strip_markdown(&alert.command)))
             .timestamp(Timestamp::now().into_twilight());
