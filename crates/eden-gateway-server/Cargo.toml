@@ -18,6 +18,7 @@ eden-utils = { workspace = true }
 eden-validation = { workspace = true }
 
 axum-extra = { version = "0.12.5", features = ["typed-header"] }
+axum-server = { version = "0.8.0", features = ["tls-rustls-no-provider", "tokio-rustls"] }
 chrono = { workspace = true }
 dashmap = { workspace = true }
 erased-report = { workspace = true }

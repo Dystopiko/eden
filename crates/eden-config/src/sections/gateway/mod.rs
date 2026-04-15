@@ -1,6 +1,11 @@
 use constant_time_eq::constant_time_eq;
+use eden_toml::TomlDiagnostic;
+use error_stack::Report;
 use serde::Deserialize;
 use std::net::{IpAddr, Ipv4Addr};
+use std::path::PathBuf;
+
+use crate::validate::{Validate, ValidationContext};
 
 /// Configuration for the gateway server.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
@@ -9,6 +14,8 @@ pub struct Gateway {
     pub ip: IpAddr,
     pub port: u16,
     pub shared_secret_token: SharedSecretToken,
+    pub tls_cert_pem: PathBuf,
+    pub tls_private_key_pem: PathBuf,
 }
 
 // Inspired from a popular nature park in the Philippines
@@ -20,7 +27,63 @@ impl Default for Gateway {
             ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
             port: DEFAULT_PORT,
             shared_secret_token: SharedSecretToken::new(""),
+            tls_cert_pem: PathBuf::new(),
+            tls_private_key_pem: PathBuf::new(),
         }
+    }
+}
+
+impl Validate for Gateway {
+    fn validate(&self, ctx: &ValidationContext<'_>) -> Result<(), Report<TomlDiagnostic>> {
+        let gateway_table = ctx.document.get("gateway");
+        let gateway_span = gateway_table.as_ref().and_then(|v| v.span());
+
+        // Treat these values as valid since portions of the string may not be valid UTF-8.
+        let is_empty = self
+            .tls_cert_pem
+            .to_str()
+            .map(|v| v.is_empty())
+            .unwrap_or(false);
+
+        if is_empty {
+            let span = gateway_table
+                .and_then(|v| v.get("tls_cert_pem"))
+                .and_then(|v| v.span())
+                .or(gateway_span);
+
+            let diagnostic = eden_toml::diagnostic(
+                "Missing `tls_cert_pem` path. TLS configuration is required in the latest version of Eden",
+                span,
+                ctx.source,
+                ctx.path,
+            );
+
+            return Err(diagnostic);
+        }
+
+        let is_empty = self
+            .tls_private_key_pem
+            .to_str()
+            .map(|v| v.is_empty())
+            .unwrap_or(false);
+
+        if is_empty {
+            let span = gateway_table
+                .and_then(|v| v.get("tls_private_key_pem"))
+                .and_then(|v| v.span())
+                .or(gateway_span);
+
+            let diagnostic = eden_toml::diagnostic(
+                "Missing `tls_private_key_pem` path. TLS configuration is required in the latest version of Eden",
+                span,
+                ctx.source,
+                ctx.path,
+            );
+
+            return Err(diagnostic);
+        }
+
+        Ok(())
     }
 }
 

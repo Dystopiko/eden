@@ -1,5 +1,31 @@
+use eden_config::Config;
+use toml_edit::DocumentMut;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, prelude::*};
+
+mod generate;
+
+/// Provides missing values for the [Eden config].
+///
+/// [Eden config]: eden_config::Config
+pub fn provide_defaults_for_config(config: &Config, document: &mut DocumentMut) {
+    if config.gateway.shared_secret_token.as_str().is_empty() {
+        let field = document
+            .entry("gateway")
+            .or_insert(toml_edit::table())
+            .as_table_like_mut()
+            .expect("config is already parsed. safe to assume gateway is a table")
+            .entry("shared_secret_token")
+            .or_insert_with(|| toml_edit::value(""));
+
+        tracing::warn!(
+            target: "eden",
+            "gateway.shared_secret_token is empty. Generating new one \
+            (this will invalidate the previous token)..."
+        );
+        *field = toml_edit::value(self::generate::shared_token());
+    }
+}
 
 /// Initializes the global [`tracing`] subscriber.
 pub fn init_tracing() {

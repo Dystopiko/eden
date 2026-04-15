@@ -120,6 +120,7 @@ impl Config {
     ) -> Result<(), Report<TomlDiagnostic>> {
         self.bot.validate(ctx)?;
         self.database.validate(ctx)?;
+        self.gateway.validate(ctx)?;
         self.sentry.validate(ctx)?;
         Ok(())
     }
